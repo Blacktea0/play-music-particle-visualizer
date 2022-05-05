@@ -1,0 +1,14 @@
+{
+  "name": "music-player",
+  "version": "1.0.0",
+  "description": "RE of particle effect from Google Play Music",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eslint-config-standard": "^17.0.0"
+  }
+}
