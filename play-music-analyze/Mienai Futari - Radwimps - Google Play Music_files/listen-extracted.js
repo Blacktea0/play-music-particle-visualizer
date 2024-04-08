@@ -387,10 +387,10 @@ TX.prototype.Iia = function(a, b) {
         a[c] = b[c] + this.ACa[c]
 }
 ;
-var UX = function() {};
-UX.prototype.update = function() {}
+var Updatable = function() {};
+Updatable.prototype.update = function() {}
 ;
-var VX = function(a, b, c, e) {
+var Gyre = function(a, b, c, e) {
     this.$h = a;
     this.Tn = b;
     this.Ha = e;
@@ -419,9 +419,9 @@ var VX = function(a, b, c, e) {
     e.Dg("bucketWidth", b);
     e.Dg("resolution", c.width, c.height)
 };
-u(VX, UX);
+u(Gyre, Updatable);
 var cka = {
-    wP: VX,
+    wP: Gyre,
     displayName: "Gyre",
     identifier: "Gyre",
     eNa: {
@@ -433,7 +433,7 @@ var cka = {
         }
     }
 };
-VX.prototype.Hpb = function(a, b) {
+Gyre.prototype.Hpb = function(a, b) {
     a.fftSize = 2048;
     try {
         for (; a.fftSize < b; )
@@ -441,7 +441,7 @@ VX.prototype.Hpb = function(a, b) {
     } catch (c) {}
 }
 ;
-VX.prototype.oUa = function() {
+Gyre.prototype.oUa = function() {
     this.$h.getFloatFrequencyData(this.Ei); // AnalyserNode component
     this.nQa.Iia(this.Ei, this.Ei);
     for (var a = 0, b = this.jE = 0; b < this.Ei.length; b++)
@@ -459,7 +459,7 @@ VX.prototype.oUa = function() {
         this.Rja[b] = 255 * Math.max(0, Math.min(1, this.Ei[b]))
 }
 ;
-VX.prototype.update = function() {
+Gyre.prototype.update = function() {
     this.oUa();
     this.Ha.bindTexture("spectrum", this.gG);
     this.Tn.texImage2D(3553, 0, this.gG.format, this.gG.width, this.gG.height, 0, this.gG.format, this.gG.type, this.Rja);
@@ -1171,39 +1171,75 @@ AudioInfo.prototype.UAb = function(a) {
         this.bL[b] = Math.max(0, 2 * this.raw[b] - this.bL[b])
 }
 ;
-/// Prticles effect
-var wY = function(a, b, c, e) {
-    // Audio node.
-    this.$h = a;
+/*
+Entrance:
+
+d.start = function(a, b) {
+    this.Hz != b && null != this.k2(b) && this.Yjb(a, b)
+}
+;
+d.Yjb = function(a, b) {
+    this.Hz = b;
+    this.lT = !1;
+    this.kf = a;
+    var c = dm("CANVAS")
+      , e = Math.max(a.offsetHeight, 16);
+    c.width = Math.max(a.offsetWidth, 16);
+    c.height = e;
+    (e = this.Wwa(c)) ? (this.XT = c,
+    b = this.k2(b),
+    null != b ? (this.LL = new MX(c,e),
+    a.appendChild(this.XT),
+    this.YFa = new this.Qu.wP(b,e,c,this.LL),
+    this.Jx = new zU(this.Yfa,null,this),
+    this.Jx.start()) : this.stop()) : this.stop()
+}
+;
+
+ */
+/**
+ * Particles visualizer constructor
+ *
+ * @param a AnalyserNode {@link AnalyserNode}
+ * @param b origin {@link WebGLRenderingContext}
+ * @param c canvas {@link HTMLCanvasElement}
+ * @param e modified {@link WebGLRenderingContext}
+ * @constructor
+ */
+var Particles = function(a, b, c, e) {
+    /**
+     * {@link AnalyserNode}
+     */
+    this.analyserNode = a;
     // Canvas
-    this.fq = c;
+    this.canvas = c;
     // Modified webgl context MX
-    this.Ha = e;
+    this.glContext = e;
     // Audio input.
-    this.zKa = new AudioInfo(256);
+    this.audioInfo = new AudioInfo(256);
     a = 100 * Math.random();
     b = 1;
-    if (320 < this.fq.width || 320 < this.fq.height)
+    if (320 < this.canvas.width || 320 < this.canvas.height)
         b = 2;
     // scaled width
-    this.KL = Math.floor(this.fq.width / b);
+    this.width = Math.floor(this.canvas.width / b);
     // scaled height
-    this.JL = Math.floor(this.fq.height / b);
+    this.height = Math.floor(this.canvas.height / b);
     // ratio
-    this.gSa = this.KL / this.JL;
-    this.ISa = this.Ha.createProgram(dY);
-    this.Ha.createProgram(cY);
-    this.KUa = this.Ha.createProgram(eY);
-    this.Kab = this.Ha.createProgram(fY);
-    this.Oib = this.Ha.createProgram(gY);
-    this.Ulb = this.Ha.createProgram(hY);
-    this.rBb = this.Ha.createProgram(iY);
+    this.ratio = this.width / this.height;
+    this.ISa = this.glContext.createProgram(dY);
+    this.glContext.createProgram(cY);
+    this.KUa = this.glContext.createProgram(eY);
+    this.Kab = this.glContext.createProgram(fY);
+    this.Oib = this.glContext.createProgram(gY);
+    this.Ulb = this.glContext.createProgram(hY);
+    this.rBb = this.glContext.createProgram(iY);
     this.qCb = this.vVa(32); // noiseTex
     b = new Uint8Array(16384);
     for (c = 0; c < b.length; ++c)
         b[c] = Math.floor(255 * Math.random());
     // texture
-    this.m6 = this.Ha.createTexture(128, 128, {
+    this.m6 = this.glContext.createTexture(128, 128, {
         filter: 9728, // NEAREST
         data: b,
         type: 5121, // UNSIGNED_BYTE
@@ -1214,10 +1250,10 @@ var wY = function(a, b, c, e) {
         filter: 9729, // LINEAR
         Gn: 33071 // CLAMP_TO_EDGE
     };
-    this.ZT = this.Ha.createFramebuffer(this.KL, this.JL, b, !1);
-    this.Lja = this.Ha.createFramebuffer(this.KL, this.JL, b, !1);
-    this.dia = this.Ha.createFramebuffer(this.KL, this.JL, b, !1);
-    this.Ji = this.Ha.e0(2, 35044, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
+    this.ZT = this.glContext.createFramebuffer(this.width, this.height, b, !1);
+    this.Lja = this.glContext.createFramebuffer(this.width, this.height, b, !1);
+    this.dia = this.glContext.createFramebuffer(this.width, this.height, b, !1);
+    this.Ji = this.glContext.e0(2, 35044, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
     this.jB = 60 * Math.random();
     this.UY = null;
     this.Jt = new Float32Array(3);
@@ -1227,25 +1263,25 @@ var wY = function(a, b, c, e) {
     this.eA = .5;
     this.iBa = !1;
     this.sU = this.tU = 0;
-    b = new uY(this.Ha,512,1024);
-    this.Si = [new vY(this.Ha,b,0,20,a), new vY(this.Ha,b,20,200,a + 50 + 50 * Math.random())];
-    this.Ha.colorMask(!0, !0, !0, !0);
-    this.Ha.depthMask(!1);
-    this.Ha.disable(2929); // DEPTH_TEST
-    this.Ha.disable(2884); // CULL_FACE
-    this.Ha.disable(3042); // BLEND
-    this.Ha.Lx(this.Kab);
-    this.Ha.$u("uv", this.Ji);
+    b = new uY(this.glContext,512,1024);
+    this.Si = [new vY(this.glContext,b,0,20,a), new vY(this.glContext,b,20,200,a + 50 + 50 * Math.random())];
+    this.glContext.colorMask(!0, !0, !0, !0);
+    this.glContext.depthMask(!1);
+    this.glContext.disable(2929); // DEPTH_TEST
+    this.glContext.disable(2884); // CULL_FACE
+    this.glContext.disable(3042); // BLEND
+    this.glContext.Lx(this.Kab);
+    this.glContext.$u("uv", this.Ji);
     for (c = 0; c < this.Si.length; ++c)
-        this.Ha.bindFramebuffer(this.Si[c].Tt),
-            this.Ha.Wn(4, 0, this.Ji.Qt),
-            this.Ha.bindFramebuffer(this.Si[c].gV),
-            this.Ha.Wn(4, 0, this.Ji.Qt);
+        this.glContext.bindFramebuffer(this.Si[c].Tt),
+            this.glContext.Wn(4, 0, this.Ji.Qt),
+            this.glContext.bindFramebuffer(this.Si[c].gV),
+            this.glContext.Wn(4, 0, this.Ji.Qt);
     this.Wab()
 };
-u(wY, UX); // inherit from UX. UX.prototype.update = function() {};
+u(Particles, Updatable); // inherit from UX. UX.prototype.update = function() {};
 var kka = {
-    wP: wY,
+    wP: Particles,
     displayName: "Particles",
     identifier: "Particles",
     eNa: {
@@ -1258,7 +1294,7 @@ var kka = {
     }
 };
 // Create noise texture
-wY.prototype.vVa = function(a) {
+Particles.prototype.vVa = function(a) {
     for (var b = new Uint8Array(a * a * a * 4), c = new Float32Array(a * a * a * 4), e = new Float32Array(a * a * a * 4), f = 0; f < b.length; f += 4)
         c[f + 0] = Math.random() - .5,
             c[f + 1] = Math.random() - .5,
@@ -1297,7 +1333,7 @@ wY.prototype.vVa = function(a) {
                  m = h * e,
                  f = 0; f < 4 * a; ++f)
             b[k + f] = b[m + f];
-    return this.Ha.createTexture(a, a * a, {
+    return this.glContext.createTexture(a, a * a, {
         data: b
     })
 }
@@ -1310,7 +1346,7 @@ var xY = function(a, b, c) {
     return createVec3(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
 };
 // d = wY.prototype;
-wY.prototype.Nma = function(a, b) {
+Particles.prototype.Nma = function(a, b) {
     a %= 6;
     a = createVec3(Math.max(0, Math.min(1, Math.abs(a - 3) - 1)), Math.max(0, Math.min(1, 2 - Math.abs(a - 2))), Math.max(0, Math.min(1, 2 - Math.abs(a - 4))));
     a[0] = 1 - b + b * a[0];
@@ -1319,20 +1355,20 @@ wY.prototype.Nma = function(a, b) {
     return a
 }
 ;
-wY.prototype.update = function(a) {
+Particles.prototype.update = function(a) {
     var b = 2 / 60;
     this.UY && (b = (a - this.UY) / 1E3,
         b = Math.min(.2, b));
     this.UY = a;
     a = this.sBb(b);
-    this.zKa.UAb(this.$h);
+    this.audioInfo.UAb(this.analyserNode);
     this.jB += a;
     this.lBb(a);
     this.HAb();
     this.tc(a)
 }
 ;
-wY.prototype.sBb = function(a) {
+Particles.prototype.sBb = function(a) {
     for (var b = this.dI.length - 1; 0 < b; --b)
         this.dI[b] = this.dI[b - 1];
     this.dI[0] = 1E3 * a;
@@ -1351,19 +1387,19 @@ wY.prototype.sBb = function(a) {
     return a / 1E3
 }
 ;
-wY.prototype.lBb = function(a) {
+Particles.prototype.lBb = function(a) {
     for (var b = 0; b < this.Si.length; ++b)
-        this.Si[b].update(a, this.zKa.bL);
-    this.Ha.colorMask(!0, !0, !0, !0);
-    this.Ha.depthMask(!1);
-    this.Ha.disable(2929);
-    this.Ha.disable(2884);
-    this.Ha.disable(3042);
-    this.Ha.Lx(this.rBb);
-    this.Ha.bindTexture("noiseTex", this.qCb);
-    this.Ha.Dg("time", this.jB, a);
-    this.Ha.Dg("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
-    this.Ha.Dg("randomTexOffset", Math.random(), Math.random());
+        this.Si[b].update(a, this.audioInfo.bL);
+    this.glContext.colorMask(!0, !0, !0, !0);
+    this.glContext.depthMask(!1);
+    this.glContext.disable(2929);
+    this.glContext.disable(2884);
+    this.glContext.disable(3042);
+    this.glContext.Lx(this.rBb);
+    this.glContext.bindTexture("noiseTex", this.qCb);
+    this.glContext.Dg("time", this.jB, a);
+    this.glContext.Dg("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
+    this.glContext.Dg("randomTexOffset", Math.random(), Math.random());
     for (b = 0; b < this.Si.length; ++b) {
         var c = this.Si[b]
             , e = c.czb()
@@ -1373,25 +1409,25 @@ wY.prototype.lBb = function(a) {
         c.gV = c.Tt;
         c.Tt = k;
         k = Math.floor(this.eA * c.Tt.height) / c.Tt.height;
-        this.Ha.bindFramebuffer(c.Tt);
-        this.Ha.bindTexture("randomTex", c.maa);
-        this.Ha.bindTexture("positionTex", c.gV.jq);
-        this.Ha.$u("uv", this.Ji);
-        this.Ha.Dg("emitterSize", .01 + f, h, a * e * 30);
-        this.Ha.Dg("pos0", this.Si[b].position);
-        this.Ha.Dg("vel0", this.Si[b].gha);
-        this.Ha.Dg("pos1", this.Si[1 - b].position);
-        this.Ha.Dg("vel1", this.Si[1 - b].gha);
-        this.Ha.Dg("quality", k);
-        this.Ha.Wn(4, 0, this.Ji.Qt) // drawArrays
+        this.glContext.bindFramebuffer(c.Tt);
+        this.glContext.bindTexture("randomTex", c.maa);
+        this.glContext.bindTexture("positionTex", c.gV.jq);
+        this.glContext.$u("uv", this.Ji);
+        this.glContext.Dg("emitterSize", .01 + f, h, a * e * 30);
+        this.glContext.Dg("pos0", this.Si[b].position);
+        this.glContext.Dg("vel0", this.Si[b].gha);
+        this.glContext.Dg("pos1", this.Si[1 - b].position);
+        this.glContext.Dg("vel1", this.Si[1 - b].gha);
+        this.glContext.Dg("quality", k);
+        this.glContext.Wn(4, 0, this.Ji.Qt) // drawArrays
     }
 }
 ;
-wY.prototype.Tlb = function() {
+Particles.prototype.Tlb = function() {
     var a = new Float32Array(16)
         , b = new Float32Array(16)
         , c = new Float32Array(16);
-    var e = this.gSa
+    var e = this.ratio
         , f = 70 * Math.PI / 180 / 2
         , h = Math.sin(f);
     0 != h && 0 != e && (f = Math.cos(f) / h,
@@ -1492,76 +1528,76 @@ wY.prototype.Tlb = function() {
     c[13] = f * wg + p * ud + G * Gf + ba * a;
     c[14] = h * wg + r * ud + J * Gf + la * a;
     c[15] = k * wg + A * ud + N * Gf + b * a;
-    this.Ha.bindFramebuffer(this.ZT);
-    this.Ha.clearColor(0, 0, 0, 0);
-    this.Ha.clear(16384);
-    this.Ha.enable(3042);
-    this.Ha.blendEquation(32774);
-    this.Ha.blendFunc(1, 1);
-    this.Ha.Lx(this.Ulb);
-    this.Ha.Dg("worldViewProj", c);
-    c = this.fq.height / 450 / (256 * this.eA);
+    this.glContext.bindFramebuffer(this.ZT);
+    this.glContext.clearColor(0, 0, 0, 0);
+    this.glContext.clear(16384);
+    this.glContext.enable(3042);
+    this.glContext.blendEquation(32774);
+    this.glContext.blendFunc(1, 1);
+    this.glContext.Lx(this.Ulb);
+    this.glContext.Dg("worldViewProj", c);
+    c = this.canvas.height / 450 / (256 * this.eA);
     c = Math.max(c, 2 / 255);
-    this.Ha.Dg("density", c);
+    this.glContext.Dg("density", c);
     for (c = 0; 2 > c; ++c)
         a = this.Si[c],
-            this.Ha.bindTexture("positionTex", a.Tt.jq),
-            this.Ha.$u("uv", a.hha),
+            this.glContext.bindTexture("positionTex", a.Tt.jq),
+            this.glContext.$u("uv", a.hha),
             a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
             e = Math.floor(a / 2),
-            0 == c ? (this.Ha.colorMask(!0, !1, !1, !1),
-                this.Ha.Wn(0, 0, e),
-                this.Ha.colorMask(!1, !0, !1, !1)) : (this.Ha.colorMask(!1, !1, !0, !1),
-                this.Ha.Wn(0, 0, e),
-                this.Ha.colorMask(!1, !1, !1, !0)),
-            this.Ha.Wn(0, e, a - e);
-    this.Ha.colorMask(!0, !0, !0, !0);
-    this.Ha.disable(3042);
-    this.Ha.bindFramebuffer(this.Lja);
-    this.Ha.Lx(this.KUa);
-    this.Ha.bindTexture("tex", this.ZT.jq);
-    this.Ha.$u("uv", this.Ji);
-    this.Ha.Dg("color0", this.Nma(.05 * this.jB, .85));
-    this.Ha.Dg("color1", this.Nma(.05 * this.jB + 2, .85));
-    this.Ha.Wn(4, 0, this.Ji.Qt)
+            0 == c ? (this.glContext.colorMask(!0, !1, !1, !1),
+                this.glContext.Wn(0, 0, e),
+                this.glContext.colorMask(!1, !0, !1, !1)) : (this.glContext.colorMask(!1, !1, !0, !1),
+                this.glContext.Wn(0, 0, e),
+                this.glContext.colorMask(!1, !1, !1, !0)),
+            this.glContext.Wn(0, e, a - e);
+    this.glContext.colorMask(!0, !0, !0, !0);
+    this.glContext.disable(3042);
+    this.glContext.bindFramebuffer(this.Lja);
+    this.glContext.Lx(this.KUa);
+    this.glContext.bindTexture("tex", this.ZT.jq);
+    this.glContext.$u("uv", this.Ji);
+    this.glContext.Dg("color0", this.Nma(.05 * this.jB, .85));
+    this.glContext.Dg("color1", this.Nma(.05 * this.jB + 2, .85));
+    this.glContext.Wn(4, 0, this.Ji.Qt)
 }
 ;
 // init component
-wY.prototype.tc = function() {
+Particles.prototype.tc = function() {
     this.Tlb();
-    this.Ha.disable(3042); // GL_BLEND
-    this.Ha.bindFramebuffer(this.ZT);
-    this.Ha.Lx(this.ISa);
-    this.Ha.bindTexture("mainTex", this.Lja.jq);
-    this.Ha.$u("uv", this.Ji);
-    this.Ha.Dg("duv", 1 / this.KL, 0);
-    this.Ha.Dg("alphaScaleOffset", 1, 0);
-    this.Ha.Wn(4, 0, this.Ji.Qt);
-    this.Ha.enable(3042);
-    this.Ha.blendFunc(770, 771);
-    this.Ha.bindFramebuffer(this.dia);
-    this.Ha.bindTexture("mainTex", this.ZT.jq);
-    this.Ha.$u("uv", this.Ji);
-    this.Ha.Dg("duv", 0, 1 / this.JL);
-    this.Ha.Dg("alphaScaleOffset", .25, .75);
-    this.Ha.Wn(4, 0, this.Ji.Qt);
-    this.Ha.disable(3042);
-    this.Ha.bindFramebuffer(null);
-    this.Ha.Lx(this.Oib);
-    this.Ha.bindTexture("mainTex", this.dia.jq);
-    this.Ha.bindTexture("grainTex", this.m6);
-    this.Ha.$u("uv", this.Ji);
-    this.Ha.Dg("grainScaleOffset", this.fq.width / this.m6.width, this.fq.height / this.m6.height, Math.random(), Math.random());
-    this.Ha.Wn(4, 0, this.Ji.Qt)
+    this.glContext.disable(3042); // GL_BLEND
+    this.glContext.bindFramebuffer(this.ZT);
+    this.glContext.Lx(this.ISa);
+    this.glContext.bindTexture("mainTex", this.Lja.jq);
+    this.glContext.$u("uv", this.Ji);
+    this.glContext.Dg("duv", 1 / this.width, 0);
+    this.glContext.Dg("alphaScaleOffset", 1, 0);
+    this.glContext.Wn(4, 0, this.Ji.Qt);
+    this.glContext.enable(3042);
+    this.glContext.blendFunc(770, 771);
+    this.glContext.bindFramebuffer(this.dia);
+    this.glContext.bindTexture("mainTex", this.ZT.jq);
+    this.glContext.$u("uv", this.Ji);
+    this.glContext.Dg("duv", 0, 1 / this.height);
+    this.glContext.Dg("alphaScaleOffset", .25, .75);
+    this.glContext.Wn(4, 0, this.Ji.Qt);
+    this.glContext.disable(3042);
+    this.glContext.bindFramebuffer(null);
+    this.glContext.Lx(this.Oib);
+    this.glContext.bindTexture("mainTex", this.dia.jq);
+    this.glContext.bindTexture("grainTex", this.m6);
+    this.glContext.$u("uv", this.Ji);
+    this.glContext.Dg("grainScaleOffset", this.canvas.width / this.m6.width, this.canvas.height / this.m6.height, Math.random(), Math.random());
+    this.glContext.Wn(4, 0, this.Ji.Qt)
 }
 ;
-wY.prototype.Wab = function() {
+Particles.prototype.Wab = function() {
     this.Jt = new Float32Array(3);
     vec3Add(this.Si[0].position, this.Si[1].position, this.Jt);
     vec3Mul(this.Jt, .5, this.Jt)
 }
 ;
-wY.prototype.HAb = function() {
+Particles.prototype.HAb = function() {
     var a = this.Si[0].position
         , b = this.Si[1].position
         , c = .3 * this.jB;
@@ -1677,3 +1713,28 @@ vY.prototype.czb = function() {
 }
 ;
 /// END OF PARTICLE EFFECT
+
+/// AnalyserNode
+var EY = function() {
+    this.Azb = Date.now()
+};
+EY.prototype.jaa = function(a) {
+    if (0 > a || 1 < a)
+        return 0;
+    a = .25 > a ? a / .25 : 1 - (a - .25) / .75;
+    return 3 * a * a - 2 * a * a * a
+}
+;
+EY.prototype.getFloatFrequencyData = function(a) {
+    var b = (Date.now() - this.Azb) / 1E3 * .8 % 1
+        , c = 0
+        , e = 0;
+    .5 > b ? c = this.jaa(2 * b) : e = this.jaa(2 * (b - .5));
+    for (var b = a.length / 16, f = Math.log(10), h = 0; h < a.length; ++h) {
+        var k = (.2 + .5 * e + c * this.jaa(h / b)) / 1.7;
+        a[h] = 0 < k ? 20 * Math.log(k) / f : -1E3
+    }
+}
+;
+
+
