@@ -79,8 +79,7 @@ var $ja = function(a, b, c, e, f) {
         a.framebufferTexture2D(36160, 36096, 3553, this.MP.handle, 0));
     a.bindFramebuffer(36160, null)
 };
-d = MX.prototype;
-d.createFramebuffer = function(a, b, c, e) {
+MX.prototype.createFramebuffer = function(a, b, c, e) {
     var f = null;
     e && (f = {
         type: 5123,
@@ -94,30 +93,30 @@ d.createFramebuffer = function(a, b, c, e) {
     return a
 }
 ;
-d.createTexture = function(a, b, c) {
+MX.prototype.createTexture = function(a, b, c) {
     a = new NX(this.Sc,a,b,c);
     this.RX.push(a);
     return a
 }
 ;
-d.$u = function(a, b) {
+MX.prototype.$u = function(a, b) {
     a = this.Nx.attributes[a];
     this.Sc.bindBuffer(34962, b.handle);
     this.Sc.vertexAttribPointer(a, b.a1, 5126, !1, 0, 0)
 }
 ;
-d.Wn = function(a, b, c) {
+MX.prototype.Wn = function(a, b, c) {
     this.Sc.drawArrays(a, b, c)
 }
 ;
 // Adding buffer data
-d.e0 = function(a, b, c) {//a: Dimension b: Usage, c: Buffer data
+MX.prototype.e0 = function(a, b, c) {//a: Dimension b: Usage, c: Buffer data
     a = new aka(this.Sc,a,b,c);
     this.PO.push(a);
     return a
 }
 ;
-d.createProgram = function(a) {
+MX.prototype.createProgram = function(a) {
     a = new a(this.Sc);
     this.iV.push(a);
     return a
@@ -259,70 +258,69 @@ var PX = function(a, b, c) {
     this.Fu = e
 };
 u(QX, PX);
-d = MX.prototype;
-d.bindFramebuffer = function(a) {
+MX.prototype.bindFramebuffer = function(a) {
     a ? (this.Sc.bindFramebuffer(36160, a.handle),
         this.Sc.viewport(0, 0, a.width, a.height)) : (this.Sc.bindFramebuffer(36160, null),
         this.Sc.viewport(0, 0, this.fq.width, this.fq.height))
 }
 ;
-d.blendColor = function(a, b, c, e) {
+MX.prototype.blendColor = function(a, b, c, e) {
     this.Sc.blendColor(a, b, c, e)
 }
 ;
-d.blendEquation = function(a) {
+MX.prototype.blendEquation = function(a) {
     this.Sc.blendEquation(a)
 }
 ;
-d.blendEquationSeparate = function(a, b) {
+MX.prototype.blendEquationSeparate = function(a, b) {
     this.Sc.blendEquationSeparate(a, b)
 }
 ;
-d.blendFunc = function(a, b) {
+MX.prototype.blendFunc = function(a, b) {
     this.Sc.blendFunc(a, b)
 }
 ;
-d.blendFuncSeparate = function(a, b, c, e) {
+MX.prototype.blendFuncSeparate = function(a, b, c, e) {
     this.Sc.blendFuncSeparate(a, b, c, e)
 }
 ;
-d.clear = function(a) {
+MX.prototype.clear = function(a) {
     this.Sc.clear(a)
 }
 ;
-d.clearColor = function(a, b, c, e) {
+MX.prototype.clearColor = function(a, b, c, e) {
     this.Sc.clearColor(a, b, c, e)
 }
 ;
-d.colorMask = function(a, b, c, e) {
+MX.prototype.colorMask = function(a, b, c, e) {
     this.Sc.colorMask(a, b, c, e)
 }
 ;
-d.depthMask = function(a) {
+MX.prototype.depthMask = function(a) {
     this.Sc.depthMask(a)
 }
 ;
-d.disable = function(a) {
+MX.prototype.disable = function(a) {
     this.Sc.disable(a)
 }
 ;
-d.enable = function(a) {
+MX.prototype.enable = function(a) {
     this.Sc.enable(a)
 }
 ;
-d.viewport = function(a, b, c, e) {
+MX.prototype.viewport = function(a, b, c, e) {
     this.Sc.viewport(a, b, c, e)
 }
 ;
-d.getExtension = function(a) {
+MX.prototype.getExtension = function(a) {
     return this.Sc.getExtension(a)
 }
 ;
-d.getSupportedExtensions = function() {
+MX.prototype.getSupportedExtensions = function() {
     return this.Sc.getSupportedExtensions()
 }
 ;
-d.Dg = function(a, b) {
+MX.prototype.Dg = function(a, b) {
     var c = this.Nx.Vr[a];
     if (!c)
         throw Error('No uniform named "' + a + '"');
