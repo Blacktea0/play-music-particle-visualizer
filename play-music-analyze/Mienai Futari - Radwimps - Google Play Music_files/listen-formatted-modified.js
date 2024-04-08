@@ -12003,7 +12003,7 @@ var Rl = function(a) {
   , bm = function(a) {
     return a ? a.parentWindow || a.defaultView : window
 }
-  , dm = function(a, b, c) {
+  , dm = function(a, b, c) { // find or create node in document
     return cm(document, arguments)
 }
   , cm = function(a, b) {
@@ -66607,17 +66607,25 @@ LX.prototype.oZ = function(a, b) {
     (a = a.target.ri()) ? this.lL.Aia(a, b) : this.mn.SM(b)
 }
 ;
+/// BEGIN OF PARTICLE EFFECT
 var MX = function(a, b) {
     Ja.call(this);
-    this.fq = a; // canvas
-    this.Sc = b; // webgl context
+    // canvas
+    this.fq = a;
+    // webgl context
+    this.Sc = b;
     this.Nx = null;
+    // buffer list
     this.PO = [];
+    // texture list
     this.yQ = [];
+    // shader list
     this.iV = [];
+    // texture list
     this.RX = []
 };
 u(MX, Ja);
+// on delete
 MX.prototype.Oa = function() {
     for (var a = 0; a < this.PO.length; ++a)
         this.Sc.deleteBuffer(this.PO[a].handle);
@@ -66757,8 +66765,11 @@ var aka = function(a, b, c, e) { // e: Buffer data.
   , OX = function(context, vsSource, fsSource) {
     this.handle = context.createProgram();
     this.attributes = {};
+    // parameter count
     this.We = 0;
+    // uniform name storage
     this.Vr = {};
+    // sampler name storage
     this.gu = {};
     var e = context.createShader(context.VERTEX_SHADER)
       , f = context.createShader(context.FRAGMENT_SHADER);
@@ -66782,6 +66793,7 @@ var aka = function(a, b, c, e) { // e: Buffer data.
     if (!context.getProgramParameter(this.handle, context.LINK_STATUS))
         throw Error("Error linking program:\n" + context.getProgramInfoLog(this.handle));
 };
+// getUniform
 OX.prototype.getUniform = function(a) {
     var b = this.Vr[a];
     if (!b)
@@ -66789,6 +66801,7 @@ OX.prototype.getUniform = function(a) {
     return b
 }
 ;
+// getSampler
 OX.prototype.E3a = function(a) {
     var b = this.gu[a];
     if (!b)
@@ -66796,6 +66809,7 @@ OX.prototype.E3a = function(a) {
     return b
 }
 ;
+// uniform functions
 var PX = function(a, b, c) {
     this.type = b;
     this.UAa = c;
@@ -67447,16 +67461,26 @@ var cY = function(a) {
     a.bindAttribLocation(this.handle, this.We, "b");
     this.attributes.uv = this.We++;
     a.useProgram(this.handle);
+    // traverse all uniform
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
         if (f) {
-            var h = dka[f.name];
-            if (h) {
-                var k = a.getUniformLocation(this.handle, f.name)
+            var name = dka[f.name];
+            if (name) {
+                var location = a.getUniformLocation(this.handle, f.name)
                   , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
-                a.uniform1i(k, f.Fu),
-                this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                var type = f.type;
+                // if type == SAMPLER_2D or SAMPLER_CUBE
+                if (35678 == type || 35680 == type) {
+                    var qx = new QX(a,type,location,c++);
+                    a.uniform1i(location, qx.Fu);
+                    this.gu[name] = qx;
+                } else {
+                    this.Vr[name] = new PX(a,f,location);
+                }
+                // 35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                // a.uniform1i(k, f.Fu),
+                // this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
             }
         }
     }
@@ -67758,16 +67782,23 @@ AudioInfo.prototype.UAb = function(a) {
 ;
 /// Prticles effect
 var wY = function(a, b, c, e) {
-    this.$h = a; // Audio node.
-    this.fq = c; // Canvas
-    this.Ha = e; // Modified webgl context MX
-    this.zKa = new AudioInfo(256); // Audio input.
+    // Audio node.
+    this.$h = a;
+    // Canvas
+    this.fq = c;
+    // Modified webgl context MX
+    this.Ha = e;
+    // Audio input.
+    this.zKa = new AudioInfo(256);
     a = 100 * Math.random();
     b = 1;
     if (320 < this.fq.width || 320 < this.fq.height)
         b = 2;
+    // scaled width
     this.KL = Math.floor(this.fq.width / b);
+    // scaled height
     this.JL = Math.floor(this.fq.height / b);
+    // ratio
     this.gSa = this.KL / this.JL;
     this.ISa = this.Ha.createProgram(dY);
     this.Ha.createProgram(cY);
@@ -67780,6 +67811,7 @@ var wY = function(a, b, c, e) {
     b = new Uint8Array(16384);
     for (c = 0; c < b.length; ++c)
         b[c] = Math.floor(255 * Math.random());
+    // texture
     this.m6 = this.Ha.createTexture(128, 128, {
         filter: 9728, // NEAREST
         data: b,
@@ -67828,9 +67860,9 @@ var kka = {
     eNa: {
         iba: ["OES_texture_float", "OES_texture_float_linear"], // getExtension
         cla: { // getContext
-            antialias: !1, 
-            depth: !1,
-            stencil: !1
+            antialias: false,
+            depth: false,
+            stencil: false
         }
     }
 };
@@ -68103,9 +68135,10 @@ wY.prototype.Tlb = function() {
     this.Ha.Wn(4, 0, this.Ji.Qt)
 }
 ;
+// init component
 wY.prototype.tc = function() {
     this.Tlb();
-    this.Ha.disable(3042);
+    this.Ha.disable(3042); // GL_BLEND
     this.Ha.bindFramebuffer(this.ZT);
     this.Ha.Lx(this.ISa);
     this.Ha.bindTexture("mainTex", this.Lja.jq);
@@ -68252,6 +68285,7 @@ vY.prototype.czb = function() {
     return .05 * this.RV
 }
 ;
+/// END OF PARTICLE EFFECT
 var yY = function() {};
 yY.prototype.lg = function() {}
 ;
@@ -68798,7 +68832,7 @@ d.kZ = function(a) {
     a.appendChild(b)
 }
 ;
-d.Wwa = function(canvas) {
+d.Wwa = function(canvas) { // get canvas context
     var b = this.Qu.eNa
       , c = b.cla;
     if (canvas = canvas.getContext("webgl", c) || canvas.getContext("experimental-webgl", c))
@@ -68827,7 +68861,7 @@ d.stop = function() {
 ;
 d.c8 = function() {
     if (null == this.h8) {
-        var a = dm("CANVAS");
+        var a = dm("CANVAS"); // a: canvas
         a.width = 64;
         a.height = 64;
         this.h8 = null != this.Wwa(a)
