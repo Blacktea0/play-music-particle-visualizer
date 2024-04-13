@@ -1,5 +1,5 @@
 /// BEGIN OF PARTICLE EFFECT
-var MX = function(a, b) {
+var MX = function (a, b) {
     Ja.call(this);
     // canvas
     this.fq = a;
@@ -17,7 +17,7 @@ var MX = function(a, b) {
 };
 u(MX, Ja);
 // on delete
-MX.prototype.Oa = function() {
+MX.prototype.Oa = function () {
     for (var a = 0; a < this.PO.length; ++a)
         this.Sc.deleteBuffer(this.PO[a].handle);
     this.PO = [];
@@ -43,7 +43,7 @@ MX.prototype.Oa = function() {
     this.RX = []
 }
 ;
-MX.prototype.Lx = function(a) {
+MX.prototype.Lx = function (a) {
     if (this.Nx != a) {
         var b = this.Nx ? this.Nx.We : 0
             , c = a.We;
@@ -58,7 +58,7 @@ MX.prototype.Lx = function(a) {
     }
 }
 ;
-MX.prototype.bindTexture = function(a, b) {
+MX.prototype.bindTexture = function (a, b) {
     var c = this.Nx.E3a(a);
     if (void 0 != c)
         this.Sc.activeTexture(33984 + c.Fu),
@@ -67,19 +67,19 @@ MX.prototype.bindTexture = function(a, b) {
         throw Error("Texture " + a + " not found");
 }
 ;
-var $ja = function(a, b, c, e, f) {
+var $ja = function (a, b, c, e, f) {
     this.MP = this.jq = null;
     this.handle = a.createFramebuffer();
     this.width = b;
     this.height = c;
     a.bindFramebuffer(36160, this.handle);
-    e && (this.jq = new NX(a,b,c,e),
+    e && (this.jq = new NX(a, b, c, e),
         a.framebufferTexture2D(36160, 36064, 3553, this.jq.handle, 0));
-    f && (this.MP = new NX(a,b,c,f),
+    f && (this.MP = new NX(a, b, c, f),
         a.framebufferTexture2D(36160, 36096, 3553, this.MP.handle, 0));
     a.bindFramebuffer(36160, null)
 };
-MX.prototype.createFramebuffer = function(a, b, c, e) {
+MX.prototype.createFramebuffer = function (a, b, c, e) {
     var f = null;
     e && (f = {
         type: 5123,
@@ -88,42 +88,42 @@ MX.prototype.createFramebuffer = function(a, b, c, e) {
         format: 6402,
         data: null
     });
-    a = new $ja(this.Sc,a,b,c,f);
+    a = new $ja(this.Sc, a, b, c, f);
     this.yQ.push(a);
     return a
 }
 ;
-MX.prototype.createTexture = function(a, b, c) {
-    a = new NX(this.Sc,a,b,c);
+MX.prototype.createTexture = function (a, b, c) {
+    a = new NX(this.Sc, a, b, c);
     this.RX.push(a);
     return a
 }
 ;
-MX.prototype.$u = function(a, b) {
+MX.prototype.$u = function (a, b) {
     a = this.Nx.attributes[a];
     this.Sc.bindBuffer(34962, b.handle);
     this.Sc.vertexAttribPointer(a, b.a1, 5126, !1, 0, 0)
 }
 ;
-MX.prototype.Wn = function(a, b, c) {
+MX.prototype.Wn = function (a, b, c) {
     this.Sc.drawArrays(a, b, c)
 }
 ;
 // Adding buffer data
-MX.prototype.e0 = function(a, b, c) {//a: Dimension b: Usage, c: Buffer data
-    a = new aka(this.Sc,a,b,c);
+MX.prototype.e0 = function (a, b, c) {//a: Dimension b: Usage, c: Buffer data
+    a = new aka(this.Sc, a, b, c);
     this.PO.push(a);
     return a
 }
 ;
-MX.prototype.createProgram = function(a) {
+MX.prototype.createProgram = function (a) {
     a = new a(this.Sc);
     this.iV.push(a);
     return a
 }
 ;
 // handle with buffer
-var aka = function(a, b, c, e) { // e: Buffer data.
+var aka = function (a, b, c, e) { // e: Buffer data.
     this.handle = a.createBuffer();
     this.a1 = b; // Dimension
     this.Qt = e.length / b; // Vertex num
@@ -135,7 +135,7 @@ var aka = function(a, b, c, e) { // e: Buffer data.
     a.bindBuffer(34962, this.handle);
     a.bufferData(34962, e, this.usage)
 }
-    , NX = function(a, b, c, e) {
+var NX = function (a, b, c, e) {
     this.width = b;
     this.height = c;
     this.handle = a.createTexture();
@@ -152,7 +152,7 @@ var aka = function(a, b, c, e) { // e: Buffer data.
     a.texParameteri(a.TEXTURE_2D, a.TEXTURE_WRAP_T, this.Gn)
 }
 /// Attach shader source to webgl context
-    , OX = function(context, vsSource, fsSource) {
+var OX = function (context, vsSource, fsSource) {
     this.handle = context.createProgram();
     this.attributes = {};
     // parameter count
@@ -184,7 +184,7 @@ var aka = function(a, b, c, e) { // e: Buffer data.
         throw Error("Error linking program:\n" + context.getProgramInfoLog(this.handle));
 };
 // getUniform
-OX.prototype.getUniform = function(a) {
+OX.prototype.getUniform = function (a) {
     var b = this.Vr[a];
     if (!b)
         throw Error("No uniform named: " + a);
@@ -192,7 +192,7 @@ OX.prototype.getUniform = function(a) {
 }
 ;
 // getSampler
-OX.prototype.E3a = function(a) {
+OX.prototype.E3a = function (a) {
     var b = this.gu[a];
     if (!b)
         throw Error("No sampler named: " + a);
@@ -200,7 +200,7 @@ OX.prototype.E3a = function(a) {
 }
 ;
 // uniform functions
-var PX = function(a, b, c) {
+var PX = function (a, b, c) {
     this.type = b;
     this.UAa = c;
     this.iT = !1;
@@ -253,74 +253,74 @@ var PX = function(a, b, c) {
             throw Error("Unrecognized uniform type: " + b);
     }
 }
-    , QX = function(a, b, c, e) {
+    , QX = function (a, b, c, e) {
     PX.call(this, a, b, c);
     this.Fu = e
 };
 u(QX, PX);
-MX.prototype.bindFramebuffer = function(a) {
+MX.prototype.bindFramebuffer = function (a) {
     a ? (this.Sc.bindFramebuffer(36160, a.handle),
         this.Sc.viewport(0, 0, a.width, a.height)) : (this.Sc.bindFramebuffer(36160, null),
         this.Sc.viewport(0, 0, this.fq.width, this.fq.height))
 }
 ;
-MX.prototype.blendColor = function(a, b, c, e) {
+MX.prototype.blendColor = function (a, b, c, e) {
     this.Sc.blendColor(a, b, c, e)
 }
 ;
-MX.prototype.blendEquation = function(a) {
+MX.prototype.blendEquation = function (a) {
     this.Sc.blendEquation(a)
 }
 ;
-MX.prototype.blendEquationSeparate = function(a, b) {
+MX.prototype.blendEquationSeparate = function (a, b) {
     this.Sc.blendEquationSeparate(a, b)
 }
 ;
-MX.prototype.blendFunc = function(a, b) {
+MX.prototype.blendFunc = function (a, b) {
     this.Sc.blendFunc(a, b)
 }
 ;
-MX.prototype.blendFuncSeparate = function(a, b, c, e) {
+MX.prototype.blendFuncSeparate = function (a, b, c, e) {
     this.Sc.blendFuncSeparate(a, b, c, e)
 }
 ;
-MX.prototype.clear = function(a) {
+MX.prototype.clear = function (a) {
     this.Sc.clear(a)
 }
 ;
-MX.prototype.clearColor = function(a, b, c, e) {
+MX.prototype.clearColor = function (a, b, c, e) {
     this.Sc.clearColor(a, b, c, e)
 }
 ;
-MX.prototype.colorMask = function(a, b, c, e) {
+MX.prototype.colorMask = function (a, b, c, e) {
     this.Sc.colorMask(a, b, c, e)
 }
 ;
-MX.prototype.depthMask = function(a) {
+MX.prototype.depthMask = function (a) {
     this.Sc.depthMask(a)
 }
 ;
-MX.prototype.disable = function(a) {
+MX.prototype.disable = function (a) {
     this.Sc.disable(a)
 }
 ;
-MX.prototype.enable = function(a) {
+MX.prototype.enable = function (a) {
     this.Sc.enable(a)
 }
 ;
-MX.prototype.viewport = function(a, b, c, e) {
+MX.prototype.viewport = function (a, b, c, e) {
     this.Sc.viewport(a, b, c, e)
 }
 ;
-MX.prototype.getExtension = function(a) {
+MX.prototype.getExtension = function (a) {
     return this.Sc.getExtension(a)
 }
 ;
-MX.prototype.getSupportedExtensions = function() {
+MX.prototype.getSupportedExtensions = function () {
     return this.Sc.getSupportedExtensions()
 }
 ;
-MX.prototype.Dg = function(a, b) {
+MX.prototype.setUniform = function (a, b) {
     var c = this.Nx.Vr[a];
     if (!c)
         throw Error('No uniform named "' + a + '"');
@@ -329,7 +329,7 @@ MX.prototype.Dg = function(a, b) {
     c.iT ? c.um.call(e, c.UAa, !1, f) : c.um.call(e, c.UAa, f)
 }
 ;
-var RX = function(a) {
+var RX = function (a) {
     OX.call(this, a,
         "precision mediump float;varying vec2 a;attribute vec2 b;void main(){gl_Position=vec4(b,0,1);a=b;}",
         "precision mediump float;varying vec2 a;\n#define pi 3.1415926535897932384626433832795\n#define c_m1 8.176\n#define maxFreq 22050.0\nuniform sampler2D c;uniform float d,e;uniform vec2 f;float u(float g){return 1.-1./(1.+exp(6.-g/(2.*pi)));}float v(float g){return 2.*pi*(log(1./g-1.)+6.);}float w(float g,float h){return floor((v(g)-h)/(2.*pi)+.5)*2.*pi+h;}vec2 x(vec2 g){return vec2(length(g),atan(g.y,g.x));}vec3 A(vec3 g){g=clamp(g,0.,1.);vec3 h=vec3(1)-g.yyy+g.y*clamp(vec3(-1.,2,2)+vec3(1,-1.,-1.)*abs(6.*g.xxx-vec3(3,2,4)),0.,1.);return h*g.z;}float B(float g){return (e/2.+c_m1*exp2(g/(2.*pi)))/maxFreq;}float C(vec2 b){vec2 g=x(b);float h,i,j,k,l,m,n,o,p;h=g.x;i=g.y;j=w(h,i);k=u(j);l=B(j);m=j-sign(h-k)*pi;n=u(m);o=texture2D(c,vec2(l,.5)).r;p=(h-k)/(n-k);return o-p;}void main(){float g,k,l,m,n,o,p,r,s,t;g=f.x/f.y;vec2 h,b,i,j,q;h=vec2(max(1.,g),max(1.,1./g));b=h*a;i=h/f;j=x(b);k=j.x;l=j.y;m=C(b);n=C(b+.5*vec2(i.x,0));o=C(b+.5*vec2(0,i.y));p=C(b+.5*i);q=abs(vec2(n-m,o-m));r=4.*max(q.x,q.y);s=.25*(smoothstep(0.,r,m)+smoothstep(0.,r,n)+smoothstep(0.,r,o)+smoothstep(0.,r,p));s*=smoothstep(1.,.97,k);t=mod(l/(2.*pi),1.);gl_FragColor=vec4(A(vec3(t,sqrt(k),s*d)),1);gl_FragColor.xyz=pow(gl_FragColor.xyz,vec3(1./2.2));}");
@@ -344,9 +344,9 @@ var RX = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -358,37 +358,40 @@ var bka = {
     e: "bucketWidth",
     f: "resolution"
 };
-var SX = function() {};
-SX.prototype.Iia = function(a, b) {
+var SX = function () {
+};
+SX.prototype.Iia = function (a, b) {
     if (a != b)
         for (var c = 0; c < a.length; c++)
             a[c] = b[c]
 }
 ;
-var TX = function(a, b) {
+var TX = function (a, b) {
     this.ACa = new Float32Array(a);
     for (var c = 0; c < a; c++)
         this.ACa[c] = this.xNa(b * c / (2 * a))
 };
 u(TX, SX);
-TX.prototype.xNa = function(a) {
+TX.prototype.xNa = function (a) {
     return 2 + 20 * Math.log(this.VOa(a)) / Math.log(10)
 }
 ;
-TX.prototype.VOa = function(a) {
+TX.prototype.VOa = function (a) {
     a *= a;
     return 14884E4 * a * a / ((a + 424.36) * (a + 14884E4) * Math.sqrt((a + 11599.29) * (a + 544496.41)))
 }
 ;
-TX.prototype.Iia = function(a, b) {
+TX.prototype.Iia = function (a, b) {
     for (var c = 0; c < a.length; c++)
         a[c] = b[c] + this.ACa[c]
 }
 ;
-var Updatable = function() {};
-Updatable.prototype.update = function() {}
+var Updatable = function () {
+};
+Updatable.prototype.update = function () {
+}
 ;
-var Gyre = function(a, b, c, e) {
+var Gyre = function (a, b, c, e) {
     this.$h = a;
     this.Tn = b;
     this.Ha = e;
@@ -406,7 +409,7 @@ var Gyre = function(a, b, c, e) {
         format: 6409,
         Gn: 33071
     });
-    this.nQa = new TX(f,44100);
+    this.nQa = new TX(f, 44100);
     a = e.createProgram(RX);
     e.colorMask(!0, !0, !0, !0);
     e.depthMask(!1);
@@ -414,8 +417,8 @@ var Gyre = function(a, b, c, e) {
     e.disable(2884);
     e.disable(3042);
     e.Lx(a);
-    e.Dg("bucketWidth", b);
-    e.Dg("resolution", c.width, c.height)
+    e.setUniform("bucketWidth", b);
+    e.setUniform("resolution", c.width, c.height)
 };
 u(Gyre, Updatable);
 var cka = {
@@ -431,15 +434,16 @@ var cka = {
         }
     }
 };
-Gyre.prototype.Hpb = function(a, b) {
+Gyre.prototype.Hpb = function (a, b) {
     a.fftSize = 2048;
     try {
-        for (; a.fftSize < b; )
+        for (; a.fftSize < b;)
             a.fftSize *= 2
-    } catch (c) {}
+    } catch (c) {
+    }
 }
 ;
-Gyre.prototype.oUa = function() {
+Gyre.prototype.oUa = function () {
     this.$h.getFloatFrequencyData(this.Ei); // AnalyserNode component
     this.nQa.Iia(this.Ei, this.Ei);
     for (var a = 0, b = this.jE = 0; b < this.Ei.length; b++)
@@ -457,43 +461,43 @@ Gyre.prototype.oUa = function() {
         this.Rja[b] = 255 * Math.max(0, Math.min(1, this.Ei[b]))
 }
 ;
-Gyre.prototype.update = function() {
+Gyre.prototype.update = function () {
     this.oUa();
     this.Ha.bindTexture("spectrum", this.gG);
     this.Tn.texImage2D(3553, 0, this.gG.format, this.gG.width, this.gG.height, 0, this.gG.format, this.gG.type, this.Rja);
-    this.Ha.Dg("loudness", 4 * Math.sqrt(this.jE));
+    this.Ha.setUniform("loudness", 4 * Math.sqrt(this.jE));
     this.Ha.$u("uv", this.Ji);
     this.Ha.Wn(4, 0, this.Ji.Qt)
 }
 ;
-var WX = function() {
+var WX = function () {
     EU.call(this);
     this.queue = []
 };
 u(WX, EU);
-WX.prototype.add = function(a) {
+WX.prototype.add = function (a) {
     Sb(this.queue, a) || (this.queue.push(a),
         v(a, "finish", this.J9, !1, this))
 }
 ;
-WX.prototype.remove = function(a) {
+WX.prototype.remove = function (a) {
     Zb(this.queue, a) && zd(a, "finish", this.J9, !1, this)
 }
 ;
-WX.prototype.Oa = function() {
-    Jb(this.queue, function(a) {
+WX.prototype.Oa = function () {
+    Jb(this.queue, function (a) {
         a.qb()
     });
     this.queue.length = 0;
     WX.Aa.Oa.call(this)
 }
 ;
-var XX = function() {
+var XX = function () {
     WX.call(this);
     this.N1 = 0
 };
 u(XX, WX);
-XX.prototype.play = function(a) {
+XX.prototype.play = function (a) {
     if (0 == this.queue.length)
         return !1;
     if (a || this.Uq())
@@ -507,22 +511,22 @@ XX.prototype.play = function(a) {
     this.startTime = t();
     this.endTime = null;
     this.dX();
-    Jb(this.queue, function(c) {
+    Jb(this.queue, function (c) {
         b && !c.kw() || c.play(a)
     });
     return !0
 }
 ;
-XX.prototype.pause = function() {
-    this.hf() && (Jb(this.queue, function(a) {
+XX.prototype.pause = function () {
+    this.hf() && (Jb(this.queue, function (a) {
         a.hf() && a.pause()
     }),
         this.oea(),
         this.O9())
 }
 ;
-XX.prototype.stop = function(a) {
-    Jb(this.queue, function(b) {
+XX.prototype.stop = function (a) {
+    Jb(this.queue, function (b) {
         b.Uq() || b.stop(a)
     });
     this.QA();
@@ -531,7 +535,7 @@ XX.prototype.stop = function(a) {
     this.fp()
 }
 ;
-XX.prototype.J9 = function() {
+XX.prototype.J9 = function () {
     this.N1++;
     this.N1 == this.queue.length && (this.endTime = t(),
         this.QA(),
@@ -539,12 +543,12 @@ XX.prototype.J9 = function() {
         this.fp())
 }
 ;
-var YX = function() {
+var YX = function () {
     WX.call(this);
     this.Ni = 0
 };
 u(YX, WX);
-YX.prototype.play = function(a) {
+YX.prototype.play = function (a) {
     if (0 == this.queue.length)
         return !1;
     if (a || this.Uq())
@@ -562,13 +566,13 @@ YX.prototype.play = function(a) {
     return !0
 }
 ;
-YX.prototype.pause = function() {
+YX.prototype.pause = function () {
     this.hf() && (this.queue[this.Ni].pause(),
         this.oea(),
         this.O9())
 }
 ;
-YX.prototype.stop = function(a) {
+YX.prototype.stop = function (a) {
     this.QA();
     this.endTime = t();
     if (a)
@@ -583,7 +587,7 @@ YX.prototype.stop = function(a) {
     this.fp()
 }
 ;
-YX.prototype.J9 = function() {
+YX.prototype.J9 = function () {
     this.hf() && (this.Ni++,
         this.Ni < this.queue.length ? this.queue[this.Ni].play() : (this.endTime = t(),
             this.QA(),
@@ -591,32 +595,35 @@ YX.prototype.J9 = function() {
             this.fp()))
 }
 ;
-var ZX = function(a, b) {
+var ZX = function (a, b) {
     Q.call(this);
     this.Ve = a;
     this.yya = b
 };
 u(ZX, Q);
 d = ZX.prototype;
-d.getName = function() {
+d.getName = function () {
     return this.Ve
 }
 ;
-d.kZ = function() {}
+d.kZ = function () {
+}
 ;
-d.start = function() {}
+d.start = function () {
+}
 ;
-d.stop = function() {}
+d.stop = function () {
+}
 ;
-d.c8 = function() {
+d.c8 = function () {
     return !1
 }
 ;
-var $X = function(a, b, c, e, f) {
+var $X = function (a, b, c, e, f) {
     HU.apply(this, arguments)
 };
 u($X, HU);
-$X.prototype.qB = function() {
+$X.prototype.qB = function () {
     var a = this.sB && this.Ft() ? "right" : "left";
     this.element.style[a] = this.coords[0] + "px";
     this.element.style.top = this.coords[1] + "px";
@@ -624,7 +631,7 @@ $X.prototype.qB = function() {
     this.element.style.height = this.coords[3] + "px"
 }
 ;
-var bY = function(a, b) {
+var bY = function (a, b) {
     ZX.call(this, "Album art", "Album art");
     this.ta = a;
     this.Da = b;
@@ -633,24 +640,24 @@ var bY = function(a, b) {
     this.Qz = this.kf = this.oj = null;
     this.Hm = new aY;
     this.pr = new aY;
-    this.Gg = new Kl(-1,-1);
+    this.Gg = new Kl(-1, -1);
     this.$j = -1;
-    this.Th = new Hl(-1,-1);
-    this.Tk = new Hl(-1,-1);
-    this.Lr = new Hl(-1,-1);
+    this.Th = new Hl(-1, -1);
+    this.Tk = new Hl(-1, -1);
+    this.Lr = new Hl(-1, -1);
     this.Cw = this.mDa = -1;
-    this.GE = new Hl(-1,-1);
+    this.GE = new Hl(-1, -1);
     this.rA = this.xba = -1;
-    this.bW = new Hl(-1,-1);
-    this.Tw = new Hl(-1,-1);
+    this.bW = new Hl(-1, -1);
+    this.Tw = new Hl(-1, -1);
     this.ra = new Lo(this)
 };
 u(bY, ZX);
-var aY = function() {
+var aY = function () {
     this.FZ = this.fl = this.he = null
 };
 d = bY.prototype;
-d.Ntb = function(a, b) {
+d.Ntb = function (a, b) {
     var c = dm("DIV", "panning-background")
         , e = dm("DIV", "panning-overlay")
         , f = dm("IMG", "panning-img");
@@ -660,11 +667,11 @@ d.Ntb = function(a, b) {
     a.appendChild(e)
 }
 ;
-d.kZ = function(a) {
+d.kZ = function (a) {
     this.HZ(q(this.Ntb, this, a))
 }
 ;
-d.start = function(a) {
+d.start = function (a) {
     this.lw || (this.lw = !0,
         this.kf = a,
         this.Gg.width = this.kf.offsetWidth,
@@ -691,18 +698,18 @@ d.start = function(a) {
         this.E1())
 }
 ;
-d.stop = function() {
+d.stop = function () {
     this.lw && (this.lw = !1,
         this.ra.removeAll(),
         hm(this.Qz),
         this.pea(0))
 }
 ;
-d.c8 = function() {
+d.c8 = function () {
     return !0
 }
 ;
-d.Yya = function(a) {
+d.Yya = function (a) {
     a.he = null;
     a.fl = dm("DIV", "art-container");
     this.Qz.appendChild(a.fl);
@@ -710,7 +717,7 @@ d.Yya = function(a) {
     a.fl.appendChild(a.FZ)
 }
 ;
-d.y$ = function() {
+d.y$ = function () {
     if (this.lw)
         switch (this.ta.ub) {
             case 4:
@@ -723,28 +730,28 @@ d.y$ = function() {
         }
 }
 ;
-d.pea = function(a) {
+d.pea = function (a) {
     this.wb = this.lw ? a : 0;
     this.oj && this.oj.qb();
     return this.lw
 }
 ;
-d.HZ = function(a) {
+d.HZ = function (a) {
     var b = this.Da.Ts();
     b ? a(b) : Oo(q(this.HZ, this, a), 500)
 }
 ;
-d.ZXa = function(a) {
+d.ZXa = function (a) {
     this.MK = !1;
     a != this.Hm.he && (this.kib(),
         this.tyb(a))
 }
 ;
-d.E1 = function() {
+d.E1 = function () {
     this.lw && this.MK && this.HZ(q(this.ZXa, this))
 }
 ;
-d.kib = function() {
+d.kib = function () {
     switch (Math.floor(4 * Math.random())) {
         case 0:
             this.Tk.x = this.Th.x;
@@ -772,7 +779,7 @@ d.kib = function() {
     }
 }
 ;
-d.tyb = function(a) {
+d.tyb = function (a) {
     if (this.pea(1)) {
         var b = this.pr;
         this.pr = this.Hm;
@@ -795,37 +802,37 @@ d.tyb = function(a) {
     }
 }
 ;
-d.Sxb = function() {
+d.Sxb = function () {
     var a = new XX, b;
     b = this.pr.fl;
-    b = new Hl(b.offsetLeft,b.offsetTop);
+    b = new Hl(b.offsetLeft, b.offsetTop);
     var c = xp(this.pr.fl);
-    a.add(new $X(this.pr.fl,[b.x, b.y, c.width, c.height],[this.Th.x, this.Th.y, this.$j, this.$j],2E3,Wia));
-    a.add(new IU(this.Hm.fl,[this.Tk.x, this.Tk.y],[this.Tk.x, this.Tk.y],2E3));
+    a.add(new $X(this.pr.fl, [b.x, b.y, c.width, c.height], [this.Th.x, this.Th.y, this.$j, this.$j], 2E3, Wia));
+    a.add(new IU(this.Hm.fl, [this.Tk.x, this.Tk.y], [this.Tk.x, this.Tk.y], 2E3));
     return a
 }
 ;
-d.oyb = function() {
+d.oyb = function () {
     var a = new XX;
-    a.add(new IU(this.pr.fl,[this.Th.x, this.Th.y],[this.Lr.x, this.Lr.y],2E3));
-    a.add(new KU(this.pr.fl,1,.3,2E3));
+    a.add(new IU(this.pr.fl, [this.Th.x, this.Th.y], [this.Lr.x, this.Lr.y], 2E3));
+    a.add(new KU(this.pr.fl, 1, .3, 2E3));
     return a
 }
 ;
-d.nyb = function() {
+d.nyb = function () {
     var a = new XX;
-    a.add(new $X(this.Hm.fl,[this.Tk.x, this.Tk.y, this.$j, this.$j],[this.Th.x, this.Th.y, this.$j, this.$j],2E3));
-    a.add(new KU(this.Hm.fl,.3,1,2E3));
+    a.add(new $X(this.Hm.fl, [this.Tk.x, this.Tk.y, this.$j, this.$j], [this.Th.x, this.Th.y, this.$j, this.$j], 2E3));
+    a.add(new KU(this.Hm.fl, .3, 1, 2E3));
     return a
 }
 ;
-d.GXa = function() {
+d.GXa = function () {
     var a = new XX;
-    a.add(new $X(this.Hm.fl,[this.Th.x, this.Th.y, this.$j, this.$j],[this.GE.x, this.GE.y, this.Cw, this.Cw],2E3,LU));
+    a.add(new $X(this.Hm.fl, [this.Th.x, this.Th.y, this.$j, this.$j], [this.GE.x, this.GE.y, this.Cw, this.Cw], 2E3, LU));
     return a
 }
 ;
-d.lDa = function() {
+d.lDa = function () {
     if (this.pea(2))
         if (this.MK)
             this.E1();
@@ -838,13 +845,13 @@ d.lDa = function() {
             this.Tw.y = Math.floor(pl(this.Gg.height - this.rA, 1));
             var a = Math.floor(pl(3E4, 45001));
             this.oj = new XX;
-            this.oj.add(new $X(this.Hm.fl,[this.bW.x, this.bW.y, this.xba, this.xba],[this.Tw.x, this.Tw.y, this.rA, this.rA],a,Xia));
+            this.oj.add(new $X(this.Hm.fl, [this.bW.x, this.bW.y, this.xba, this.xba], [this.Tw.x, this.Tw.y, this.rA, this.rA], a, Xia));
             v(this.oj, "end", q(this.lDa, this));
             this.oj.play()
         }
 }
 ;
-var cY = function(a) {
+var cY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;uniform vec4 c;void main(){a=b;vec2 d=b*c.xy+c.zw;gl_Position=vec4(d*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d;void main(){vec4 e=texture2D(d,a);gl_FragColor=e;}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -861,11 +868,11 @@ var cY = function(a) {
                 var type = f.type;
                 // if type == SAMPLER_2D or SAMPLER_CUBE
                 if (35678 == type || 35680 == type) {
-                    var qx = new QX(a,type,location,c++);
+                    var qx = new QX(a, type, location, c++);
                     a.uniform1i(location, qx.Fu);
                     this.gu[name] = qx;
                 } else {
-                    this.Vr[name] = new PX(a,f,location);
+                    this.Vr[name] = new PX(a, f, location);
                 }
                 // 35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
                 // a.uniform1i(k, f.Fu),
@@ -879,7 +886,7 @@ var dka = {
     c: "scaleOffset",
     d: "tex"
 };
-var dY = function(a) {
+var dY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec2 d,e;void main(){vec4 f,g,h,i,j,k,l,m,n,o,p,q,r,s,t;f=texture2D(c,a);g=texture2D(c,a-d);h=texture2D(c,a+d);i=texture2D(c,a-2.*d);j=texture2D(c,a+2.*d);k=texture2D(c,a-3.*d);l=texture2D(c,a+3.*d);m=vec4(0);n=vec4(1);o=.8521*max(m,n-.7*abs(g-f));p=.8521*max(m,n-.7*abs(h-f));q=.5273*max(m,n-2.*abs(i-f));r=.5273*max(m,n-2.*abs(j-f));s=.2369*max(m,n-2.*abs(k-f));t=.2369*max(m,n-2.*abs(l-f));f+=o*g+p*h+q*i+r*j+s*k+t*l;gl_FragColor=f/(o+p+q+r+s+t+1.);gl_FragColor.a=e.x*gl_FragColor.a+e.y;}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -892,9 +899,9 @@ var dY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -905,7 +912,7 @@ var eka = {
     d: "duv",
     e: "alphaScaleOffset"
 };
-var eY = function(a) {
+var eY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec3 d,e;void main(){vec4 f,i;f=texture2D(c,a);float g,h;g=.5*(f.x+f.y);h=.5*(f.z+f.w);i=vec4(d*g+e*h,g+h);gl_FragColor=2.*sqrt(i);gl_FragColor.xyz=vec3(1)-gl_FragColor.xyz;}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -918,9 +925,9 @@ var eY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -931,7 +938,7 @@ var fka = {
     d: "color0",
     e: "color1"
 };
-var fY = function(a) {
+var fY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;void main(){gl_FragColor=vec4(0,-10000,0,0);}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -944,16 +951,17 @@ var fY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
-};3
+};
+3
 u(fY, OX);
 var gka = {};
-var gY = function(a) {
+var gY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c,d;uniform vec4 e;void main(){vec2 f=a*2.-vec2(1);float g,h;g=smoothstep(.2,5.,dot(f,f));h=texture2D(c,a*e.xy+e.zw).w;vec3 i=texture2D(d,a).xyz;i*=1.-g;gl_FragColor.xyz=abs(i-.05*h);gl_FragColor.w=1.;}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -966,9 +974,9 @@ var gY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -979,7 +987,7 @@ var hka = {
     d: "mainTex",
     e: "grainScaleOffset"
 };
-var hY = function(a) {
+var hY = function (a) {
     OX.call(this, a, "precision mediump float;attribute vec2 a;uniform sampler2D b;uniform mat4 c;void main(){vec4 d=texture2D(b,a);gl_Position=c*vec4(d.xyz,1);gl_PointSize=1.+min(1./gl_Position.w,64.);}", "precision mediump float;uniform float d;void main(){vec2 a=2.*(gl_PointCoord-vec2(.5));float e=1.-smoothstep(0.,1.,dot(a,a));gl_FragColor=vec4(d*e);}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "a");
@@ -992,9 +1000,9 @@ var hY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -1005,7 +1013,7 @@ var ika = {
     c: "worldViewProj",
     d: "density"
 };
-var iY = function(a) {
+var iY = function (a) {
     OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;uniform float c;void main(){a=b*vec2(1,c);gl_Position=vec4(a*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d,e,f;uniform vec2 g,h;uniform vec3 i,j,k,l,m,n;const float o=32.;const float p=.5/(o*(o-1.));const float q=o/(o-1.);const float r=(o-1.)/(o*o);const float s=o;const float t=1./o;vec3 F(vec3 u){float v=p+floor(u.z)*t;return texture2D(f,vec2(u.x,v+fract(u.y*q)*r)).xyz;}vec3 G(vec3 u){u.z*=o;vec3 v,w,x,A,B,C,D,E;v=u*.03-g.x*vec3(.03,.05,.07);w=F(v);x=F(v+vec3(0,0,1));A=2.*mix(w,x,fract(v.z))-vec3(1);B=u*.15+g.x*vec3(.01,.02,.03);C=F(B);D=F(B+vec3(0,0,1));E=2.*mix(C,D,fract(B.z))-vec3(1);return 8.*A+5.*E+m;}vec3 H(vec4 u,vec3 v,vec3 w){vec3 x,B;x=u.xyz-v;float A=dot(x,x);B=x/(1.+A*A);B*=1.5*max(0.,dot(x,w));return B;}vec3 I(vec4 u,vec3 v,float w){vec3 x,A;x=u.xyz-v;A=(1.-smoothstep(0.,.5,u.w))*normalize(x);return A*w;}void main(){vec4 u,w;u=texture2D(d,a);float v,B,C,D;v=texture2D(e,a+h).w;w=texture2D(e,a);vec3 x,A,E;x=i-w.w*j;A=k-w.w*l;B=n.x;C=n.y;D=n.z;if(v<C)u=vec4(x+B*w.xyz,0);u.xyz+=H(u,x,j)+H(u,A,l)+I(u,x,D);E=G(u.xyz);u.xyz+=g.y*30.*.002*E;u.w+=g.y;if(u.w>2.+4.*w.w)u.y=-1e4;gl_FragColor=u;}");
     this.We = 0;
     a.bindAttribLocation(this.handle, this.We, "b");
@@ -1018,9 +1026,9 @@ var iY = function(a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
+                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
                     a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a,f,k)
+                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
             }
         }
     }
@@ -1040,13 +1048,13 @@ var jka = {
     m: "drift",
     n: "emitterSize"
 };
-var jY = function(a) {
+var jY = function (a) {
     this.length = a.length || a;
     for (var b = 0; b < this.length; b++)
         this[b] = a[b] || 0
 };
 jY.prototype.BYTES_PER_ELEMENT = 4;
-jY.prototype.set = function(a, b) {
+jY.prototype.set = function (a, b) {
     b = b || 0;
     for (var c = 0; c < a.length && b + c < this.length; c++)
         this[b + c] = a[c]
@@ -1058,13 +1066,13 @@ jY.prototype.toString = Array.prototype.join;
     jY.prototype.set = jY.prototype.set,
     jY.prototype.toString = jY.prototype.toString,
     ta("Float32Array", jY, void 0));
-var kY = function(a) {
+var kY = function (a) {
     this.length = a.length || a;
     for (var b = 0; b < this.length; b++)
         this[b] = a[b] || 0
 };
 kY.prototype.BYTES_PER_ELEMENT = 8;
-kY.prototype.set = function(a, b) {
+kY.prototype.set = function (a, b) {
     b = b || 0;
     for (var c = 0; c < a.length && b + c < this.length; c++)
         this[b + c] = a[c]
@@ -1074,38 +1082,39 @@ kY.prototype.toString = Array.prototype.join;
 if ("undefined" == typeof Float64Array) {
     try {
         kY.BYTES_PER_ELEMENT = 8
-    } catch (a) {}
+    } catch (a) {
+    }
     kY.prototype.BYTES_PER_ELEMENT = kY.prototype.BYTES_PER_ELEMENT;
     kY.prototype.set = kY.prototype.set;
     kY.prototype.toString = kY.prototype.toString;
     ta("Float64Array", kY, void 0)
 }
-;var createVec3 = function(a, b, c) {
+;var createVec3 = function (a, b, c) {
     var e = new Float32Array(3);
     e[0] = a;
     e[1] = b;
     e[2] = c;
     return e
 }
-    , vec3Add = function(a, b, c) {
+    , vec3Add = function (a, b, c) {
         c[0] = a[0] + b[0];
         c[1] = a[1] + b[1];
         c[2] = a[2] + b[2];
         return c
     }
-    , vec3Sub = function(a, b, c) {
+    , vec3Sub = function (a, b, c) {
         c[0] = a[0] - b[0];
         c[1] = a[1] - b[1];
         c[2] = a[2] - b[2];
         return c
     }
-    , vec3Mul = function(a, b, c) {
+    , vec3Mul = function (a, b, c) {
         c[0] = a[0] * b;
         c[1] = a[1] * b;
         c[2] = a[2] * b;
         return c
     }
-    , vec3Div = function(a, b) {
+    , vec3Div = function (a, b) {
         var c = a[0]
             , e = a[1]
             , f = a[2]
@@ -1115,7 +1124,7 @@ if ("undefined" == typeof Float64Array) {
         b[2] = a[2] * c;
         return b
     }
-    , qY = function(a, b, c) {
+    , qY = function (a, b, c) {
         var e = a[0]
             , f = a[1];
         a = a[2];
@@ -1127,7 +1136,7 @@ if ("undefined" == typeof Float64Array) {
         c[2] = e * k - f * h;
         return c
     };
-var rY = function(a, b, c) {
+var rY = function (a, b, c) {
     a[b] = c[0];
     a[b + 4] = c[1];
     a[b + 8] = c[2];
@@ -1136,12 +1145,12 @@ var rY = function(a, b, c) {
 }
     , sY = [new Float64Array(4), new Float64Array(4), new Float64Array(4)];
 /// Get audio infomation
-var AudioInfo = function(length) {
+var AudioInfo = function (length) {
     this.raw = new Float32Array(length);
     this.bL = new Float32Array(length);
     this.S$ = new Float32Array(length)
 };
-AudioInfo.prototype.syb = function(a, b, c) {
+AudioInfo.prototype.syb = function (a, b, c) {
     for (var e = Math.min(a.length, b.length), f = 0; f < e; ++f) {
         for (var h = 0, k = 0, m = -c; m <= c; ++m) {
             var p = f + m;
@@ -1155,7 +1164,7 @@ AudioInfo.prototype.syb = function(a, b, c) {
     }
 }
 ;
-AudioInfo.prototype.UAb = function(a) {
+AudioInfo.prototype.UAb = function (a) {
     for (var b = 0; b < this.S$.length; ++b)
         this.S$[b] = this.raw[b];
     a.getFloatFrequencyData(this.raw);
@@ -1204,7 +1213,7 @@ d.Yjb = function(a, b) {
  * @param e modified {@link WebGLRenderingContext}
  * @constructor
  */
-var Particles = function(a, b, c, e) {
+var Particles = function (a, b, c, e) {
     /**
      * {@link AnalyserNode}
      */
@@ -1232,14 +1241,13 @@ var Particles = function(a, b, c, e) {
     this.Oib = this.glContext.createProgram(gY);
     this.Ulb = this.glContext.createProgram(hY);
     this.rBb = this.glContext.createProgram(iY);
-    this.qCb = this.vVa(32); // noiseTex
-    b = new Uint8Array(16384);
+    this.noiseText = this.createNoiseTex(32); // noiseTex
+    const random = new Uint8Array(16384);
     for (c = 0; c < b.length; ++c)
-        b[c] = Math.floor(255 * Math.random());
-    // texture
-    this.m6 = this.glContext.createTexture(128, 128, {
+        random[c] = Math.floor(255 * Math.random());
+    this.grainTex = this.glContext.createTexture(128, 128, {
         filter: 9728, // NEAREST
-        data: b,
+        data: random,
         type: 5121, // UNSIGNED_BYTE
         format: 6406, // ALPHA
         Gn: 10497 // REPEAT
@@ -1261,8 +1269,8 @@ var Particles = function(a, b, c, e) {
     this.eA = .5;
     this.iBa = !1;
     this.sU = this.tU = 0;
-    b = new uY(this.glContext,512,1024);
-    this.Si = [new vY(this.glContext,b,0,20,a), new vY(this.glContext,b,20,200,a + 50 + 50 * Math.random())];
+    b = new uY(this.glContext, 512, 1024);
+    this.Si = [new vY(this.glContext, b, 0, 20, a), new vY(this.glContext, b, 20, 200, a + 50 + 50 * Math.random())];
     this.glContext.colorMask(!0, !0, !0, !0);
     this.glContext.depthMask(!1);
     this.glContext.disable(2929); // DEPTH_TEST
@@ -1292,7 +1300,7 @@ var kka = {
     }
 };
 // Create noise texture
-Particles.prototype.vVa = function(a) {
+Particles.prototype.createNoiseTex = function (a) {
     for (var b = new Uint8Array(a * a * a * 4), c = new Float32Array(a * a * a * 4), e = new Float32Array(a * a * a * 4), f = 0; f < b.length; f += 4)
         c[f + 0] = Math.random() - .5,
             c[f + 1] = Math.random() - .5,
@@ -1336,7 +1344,7 @@ Particles.prototype.vVa = function(a) {
     })
 }
 ;
-var xY = function(a, b, c) {
+var xY = function (a, b, c) {
     var e = 2 * (Math.cos(.51 * a) + Math.sin(.29 * a))
         , f = 3 * Math.cos(a + Math.sin(.47 * a)) - 2 * Math.sin(.79 * a);
     a = .5 + .5 * (Math.sin(a + Math.cos(.31 * a)) * Math.cos(3.7 * a) - Math.sin(2.1 * a));
@@ -1344,7 +1352,7 @@ var xY = function(a, b, c) {
     return createVec3(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
 };
 // d = wY.prototype;
-Particles.prototype.Nma = function(a, b) {
+Particles.prototype.Nma = function (a, b) {
     a %= 6;
     a = createVec3(Math.max(0, Math.min(1, Math.abs(a - 3) - 1)), Math.max(0, Math.min(1, 2 - Math.abs(a - 2))), Math.max(0, Math.min(1, 2 - Math.abs(a - 4))));
     a[0] = 1 - b + b * a[0];
@@ -1353,7 +1361,7 @@ Particles.prototype.Nma = function(a, b) {
     return a
 }
 ;
-Particles.prototype.update = function(a) {
+Particles.prototype.update = function (a) {
     var b = 2 / 60;
     this.UY && (b = (a - this.UY) / 1E3,
         b = Math.min(.2, b));
@@ -1366,7 +1374,7 @@ Particles.prototype.update = function(a) {
     this.tc(a)
 }
 ;
-Particles.prototype.sBb = function(a) {
+Particles.prototype.sBb = function (a) {
     for (var b = this.dI.length - 1; 0 < b; --b)
         this.dI[b] = this.dI[b - 1];
     this.dI[0] = 1E3 * a;
@@ -1385,7 +1393,7 @@ Particles.prototype.sBb = function(a) {
     return a / 1E3
 }
 ;
-Particles.prototype.lBb = function(a) {
+Particles.prototype.lBb = function (a) {
     for (var b = 0; b < this.Si.length; ++b)
         this.Si[b].update(a, this.audioInfo.bL);
     this.glContext.colorMask(!0, !0, !0, !0);
@@ -1394,10 +1402,10 @@ Particles.prototype.lBb = function(a) {
     this.glContext.disable(2884);
     this.glContext.disable(3042);
     this.glContext.Lx(this.rBb);
-    this.glContext.bindTexture("noiseTex", this.qCb);
-    this.glContext.Dg("time", this.jB, a);
-    this.glContext.Dg("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
-    this.glContext.Dg("randomTexOffset", Math.random(), Math.random());
+    this.glContext.bindTexture("noiseTex", this.noiseText);
+    this.glContext.setUniform("time", this.jB, a);
+    this.glContext.setUniform("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
+    this.glContext.setUniform("randomTexOffset", Math.random(), Math.random());
     for (b = 0; b < this.Si.length; ++b) {
         var c = this.Si[b]
             , e = c.czb()
@@ -1411,17 +1419,17 @@ Particles.prototype.lBb = function(a) {
         this.glContext.bindTexture("randomTex", c.maa);
         this.glContext.bindTexture("positionTex", c.gV.jq);
         this.glContext.$u("uv", this.Ji);
-        this.glContext.Dg("emitterSize", .01 + f, h, a * e * 30);
-        this.glContext.Dg("pos0", this.Si[b].position);
-        this.glContext.Dg("vel0", this.Si[b].gha);
-        this.glContext.Dg("pos1", this.Si[1 - b].position);
-        this.glContext.Dg("vel1", this.Si[1 - b].gha);
-        this.glContext.Dg("quality", k);
+        this.glContext.setUniform("emitterSize", .01 + f, h, a * e * 30);
+        this.glContext.setUniform("pos0", this.Si[b].position);
+        this.glContext.setUniform("vel0", this.Si[b].gha);
+        this.glContext.setUniform("pos1", this.Si[1 - b].position);
+        this.glContext.setUniform("vel1", this.Si[1 - b].gha);
+        this.glContext.setUniform("quality", k);
         this.glContext.Wn(4, 0, this.Ji.Qt) // drawArrays
     }
 }
 ;
-Particles.prototype.Tlb = function() {
+Particles.prototype.Tlb = function () {
     var a = new Float32Array(16)
         , b = new Float32Array(16)
         , c = new Float32Array(16);
@@ -1533,10 +1541,10 @@ Particles.prototype.Tlb = function() {
     this.glContext.blendEquation(32774);
     this.glContext.blendFunc(1, 1);
     this.glContext.Lx(this.Ulb);
-    this.glContext.Dg("worldViewProj", c);
+    this.glContext.setUniform("worldViewProj", c);
     c = this.canvas.height / 450 / (256 * this.eA);
     c = Math.max(c, 2 / 255);
-    this.glContext.Dg("density", c);
+    this.glContext.setUniform("density", c);
     for (c = 0; 2 > c; ++c)
         a = this.Si[c],
             this.glContext.bindTexture("positionTex", a.Tt.jq),
@@ -1555,47 +1563,47 @@ Particles.prototype.Tlb = function() {
     this.glContext.Lx(this.KUa);
     this.glContext.bindTexture("tex", this.ZT.jq);
     this.glContext.$u("uv", this.Ji);
-    this.glContext.Dg("color0", this.Nma(.05 * this.jB, .85));
-    this.glContext.Dg("color1", this.Nma(.05 * this.jB + 2, .85));
+    this.glContext.setUniform("color0", this.Nma(.05 * this.jB, .85));
+    this.glContext.setUniform("color1", this.Nma(.05 * this.jB + 2, .85));
     this.glContext.Wn(4, 0, this.Ji.Qt)
 }
 ;
 // init component
-Particles.prototype.tc = function() {
+Particles.prototype.tc = function () {
     this.Tlb();
     this.glContext.disable(3042); // GL_BLEND
     this.glContext.bindFramebuffer(this.ZT);
     this.glContext.Lx(this.ISa);
     this.glContext.bindTexture("mainTex", this.Lja.jq);
     this.glContext.$u("uv", this.Ji);
-    this.glContext.Dg("duv", 1 / this.width, 0);
-    this.glContext.Dg("alphaScaleOffset", 1, 0);
+    this.glContext.setUniform("duv", 1 / this.width, 0);
+    this.glContext.setUniform("alphaScaleOffset", 1, 0);
     this.glContext.Wn(4, 0, this.Ji.Qt);
     this.glContext.enable(3042);
     this.glContext.blendFunc(770, 771);
     this.glContext.bindFramebuffer(this.dia);
     this.glContext.bindTexture("mainTex", this.ZT.jq);
     this.glContext.$u("uv", this.Ji);
-    this.glContext.Dg("duv", 0, 1 / this.height);
-    this.glContext.Dg("alphaScaleOffset", .25, .75);
+    this.glContext.setUniform("duv", 0, 1 / this.height);
+    this.glContext.setUniform("alphaScaleOffset", .25, .75);
     this.glContext.Wn(4, 0, this.Ji.Qt);
     this.glContext.disable(3042);
     this.glContext.bindFramebuffer(null);
     this.glContext.Lx(this.Oib);
     this.glContext.bindTexture("mainTex", this.dia.jq);
-    this.glContext.bindTexture("grainTex", this.m6);
+    this.glContext.bindTexture("grainTex", this.grainTex);
     this.glContext.$u("uv", this.Ji);
-    this.glContext.Dg("grainScaleOffset", this.canvas.width / this.m6.width, this.canvas.height / this.m6.height, Math.random(), Math.random());
+    this.glContext.setUniform("grainScaleOffset", this.canvas.width / this.grainTex.width, this.canvas.height / this.grainTex.height, Math.random(), Math.random());
     this.glContext.Wn(4, 0, this.Ji.Qt)
 }
 ;
-Particles.prototype.Wab = function() {
+Particles.prototype.Wab = function () {
     this.Jt = new Float32Array(3);
     vec3Add(this.Si[0].position, this.Si[1].position, this.Jt);
     vec3Mul(this.Jt, .5, this.Jt)
 }
 ;
-Particles.prototype.HAb = function() {
+Particles.prototype.HAb = function () {
     var a = this.Si[0].position
         , b = this.Si[1].position
         , c = .3 * this.jB;
@@ -1608,31 +1616,32 @@ Particles.prototype.HAb = function() {
     vec3Add(this.Jt, c, this.Jt)
 }
 ;
-var uY = function(a, b, c) {
+var uY = function (a, b, c) {
     this.mN = b;
     this.kN = c;
     this.y9 = b * c;
     this.maa = this.jVa(a);
     this.hha = this.tVa(a)
 };
-uY.prototype.jVa = function(a) {
-    for (var b = this.mN, c = this.kN, e = new Float32Array(b * c * 4), f = Math.floor(e.length / 8), h = 0; h < f; ) {
+uY.prototype.jVa = function (a) {
+    for (var b = this.mN, c = this.kN, e = new Float32Array(b * c * 4), f = Math.floor(e.length / 8), h = 0; h < f;) {
         var k, m, p;
         do
             k = 2 * Math.random() - 1,
                 m = 2 * Math.random() - 1,
                 p = 2 * Math.random() - 1;
-        while (1 < k * k + m * m + p * p);e[h++] = k;
+        while (1 < k * k + m * m + p * p);
+        e[h++] = k;
         e[h++] = m;
         e[h++] = p;
         e[h++] = Math.random()
     }
-    for (var r = [-1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1], A = 0; f < e.length; )
+    for (var r = [-1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1], A = 0; f < e.length;)
         for (k = e[A++],
                  m = e[A++],
                  p = e[A++],
                  A++,
-                 h = 0; h < r.length; )
+                 h = 0; h < r.length;)
             e[f++] = k * r[h++],
                 e[f++] = m * r[h++],
                 e[f++] = p * r[h++],
@@ -1645,7 +1654,7 @@ uY.prototype.jVa = function(a) {
     })
 }
 ;
-uY.prototype.tVa = function(a) {
+uY.prototype.tVa = function (a) {
     for (var b = new Float32Array(2 * this.y9), c = 0, e = 0; e < this.kN; ++e)
         for (var f = 0; f < this.mN; ++f) {
             var h = f / this.mN
@@ -1656,7 +1665,7 @@ uY.prototype.tVa = function(a) {
     return a.e0(2, 35044, b)
 }
 ;
-var vY = function(a, b, c, e, f) {
+var vY = function (a, b, c, e, f) {
     this.doa = c;
     this.tfa = this.RV = 0;
     this.MX = f;
@@ -1674,12 +1683,12 @@ var vY = function(a, b, c, e, f) {
     this.hha = b.hha;
     this.sMa(0)
 };
-vY.prototype.update = function(a, b) {
+vY.prototype.update = function (a, b) {
     this.xBb(b);
     this.sMa(a)
 }
 ;
-vY.prototype.sMa = function(a) {
+vY.prototype.sMa = function (a) {
     var b = this.position
         , c = xY(this.MX + .01, 1.5, 3)
         , e = b[0] - c[0]
@@ -1693,7 +1702,7 @@ vY.prototype.sMa = function(a) {
     this.position = a
 }
 ;
-vY.prototype.xBb = function(a) {
+vY.prototype.xBb = function (a) {
     for (var b = this.TE[0].length, c = 0, e = 0; e < b; ++e)
          var f = a[e + this.doa] - Math.min(this.TE[0][e], this.TE[1][e])
              , f = 4 * f
@@ -1706,24 +1715,24 @@ vY.prototype.xBb = function(a) {
             this.TE[0][e] = a[e + this.doa]
 }
 ;
-vY.prototype.czb = function() {
+vY.prototype.czb = function () {
     return .05 * this.RV
 }
 ;
 /// END OF PARTICLE EFFECT
 
 /// AnalyserNode
-var EY = function() {
+var EY = function () {
     this.Azb = Date.now()
 };
-EY.prototype.jaa = function(a) {
+EY.prototype.jaa = function (a) {
     if (0 > a || 1 < a)
         return 0;
     a = .25 > a ? a / .25 : 1 - (a - .25) / .75;
     return 3 * a * a - 2 * a * a * a
 }
 ;
-EY.prototype.getFloatFrequencyData = function(a) {
+EY.prototype.getFloatFrequencyData = function (a) {
     var b = (Date.now() - this.Azb) / 1E3 * .8 % 1
         , c = 0
         , e = 0;
