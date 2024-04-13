@@ -1,166 +1,242 @@
+var u = function(a, b) {
+    function c() {}
+    c.prototype = b.prototype;
+    a.Aa = b.prototype; // the base class of a is b
+    a.prototype = new c;
+    a.prototype.constructor = a;
+    a.vNb = function(a, c, h) {
+        for (var e = Array(arguments.length - 2), f = 2; f < arguments.length; f++)
+            e[f - 2] = arguments[f];
+        return b.prototype[c].apply(a, e)
+    }
+};
+var Ja = function() {
+    this.nC = this.nC;
+    this.Oz = this.Oz
+};
+Ja.prototyped.nC = !1;
+Ja.prototyped.isDisposed = function() {
+    return this.nC
+}
+;
+Ja.prototyped.qb = function() {
+    this.nC || (this.nC = !0,
+        this.Oa())
+}
+;
+Ja.prototyped.Ag = function(a) {
+    this.TQa(Ga(Ka, a))
+}
+;
+Ja.prototyped.TQa = function(a, b) {
+    this.nC ? l(b) ? a.call(b) : a() : (this.Oz || (this.Oz = []),
+        this.Oz.push(l(b) ? q(a, b) : a))
+}
+;
+Ja.prototyped.clear = function() {
+    if (this.Oz)
+        for (; this.Oz.length; )
+            this.Oz.shift()()
+}
+;
 /// BEGIN OF PARTICLE EFFECT
 var MX = function (a, b) {
     Ja.call(this);
     // canvas
-    this.fq = a;
+    this.canvas = a;
     // webgl context
-    this.Sc = b;
-    this.Nx = null;
+    this.gl = b;
+    // current using program
+    this.usingProgram = null;
     // buffer list
-    this.PO = [];
-    // texture list
-    this.yQ = [];
+    this.bufferList = [];
+    // framebuffer list
+    this.framebufferList = [];
     // shader list
-    this.iV = [];
+    this.programList = [];
     // texture list
-    this.RX = []
+    this.textureList = []
 };
 u(MX, Ja);
 // on delete
-MX.prototype.Oa = function () {
-    for (var a = 0; a < this.PO.length; ++a)
-        this.Sc.deleteBuffer(this.PO[a].handle);
-    this.PO = [];
-    for (a = 0; a < this.yQ.length; ++a) {
-        var b = this.yQ[a];
-        b.jq && this.Sc.deleteTexture(b.jq.handle);
-        b.MP && this.Sc.deleteTexture(b.MP.handle);
-        this.Sc.deleteFramebuffer(b.handle)
+MX.prototype.clear = function () {
+    for (var a = 0; a < this.bufferList.length; ++a)
+        this.gl.deleteBuffer(this.bufferList[a].handle);
+    this.bufferList = [];
+    for (a = 0; a < this.framebufferList.length; ++a) {
+        var b = this.framebufferList[a];
+        b.colorTexture && this.gl.deleteTexture(b.colorTexture.handle);
+        b.depthTexture && this.gl.deleteTexture(b.depthTexture.handle);
+        this.gl.deleteFramebuffer(b.handle)
     }
-    this.yQ = [];
-    for (a = 0; a < this.iV.length; ++a) {
-        var b = this.iV[a]
-            , c = this.Sc.getAttachedShaders(b.handle);
+    this.framebufferList = [];
+    for (a = 0; a < this.programList.length; ++a) {
+        var b = this.programList[a]
+            , c = this.gl.getAttachedShaders(b.handle);
         if (c)
             for (var e = 0; e < c.length; ++e)
-                this.Sc.detachShader(b.handle, c[e]),
-                    this.Sc.deleteShader(c[e]);
-        this.Sc.deleteProgram(b.handle)
+                this.gl.detachShader(b.handle, c[e]),
+                    this.gl.deleteShader(c[e]);
+        this.gl.deleteProgram(b.handle)
     }
-    this.iV = [];
-    for (a = 0; a < this.RX.length; ++a)
-        this.Sc.deleteTexture(this.RX[a].handle);
-    this.RX = []
+    this.programList = [];
+    for (a = 0; a < this.textureList.length; ++a)
+        this.gl.deleteTexture(this.textureList[a].handle);
+    this.textureList = []
 }
 ;
-MX.prototype.Lx = function (a) {
-    if (this.Nx != a) {
-        var b = this.Nx ? this.Nx.We : 0
-            , c = a.We;
+MX.prototype.activateProgram = function (program) {
+    if (this.usingProgram != program) {
+        var b = this.usingProgram ? this.usingProgram.attribCount : 0
+            , c = program.attribCount;
         if (b > c)
             for (var e = c; e < b; ++e)
-                this.Sc.disableVertexAttribArray(e);
+                this.gl.disableVertexAttribArray(e);
         else
             for (e = b; e < c; ++e)
-                this.Sc.enableVertexAttribArray(e);
-        this.Sc.useProgram(a.handle);
-        this.Nx = a
+                this.gl.enableVertexAttribArray(e);
+        this.gl.useProgram(program.handle);
+        this.usingProgram = program
     }
 }
 ;
 MX.prototype.bindTexture = function (a, b) {
-    var c = this.Nx.E3a(a);
+    var c = this.usingProgram.getSampler(a);
     if (void 0 != c)
-        this.Sc.activeTexture(33984 + c.Fu),
-            this.Sc.bindTexture(3553, b.handle);
+        this.gl.activeTexture(33984 + c.textureX),
+            this.gl.bindTexture(3553, b.handle);
     else
         throw Error("Texture " + a + " not found");
 }
 ;
-var $ja = function (a, b, c, e, f) {
-    this.MP = this.jq = null;
-    this.handle = a.createFramebuffer();
-    this.width = b;
-    this.height = c;
-    a.bindFramebuffer(36160, this.handle);
-    e && (this.jq = new NX(a, b, c, e),
-        a.framebufferTexture2D(36160, 36064, 3553, this.jq.handle, 0));
-    f && (this.MP = new NX(a, b, c, f),
-        a.framebufferTexture2D(36160, 36096, 3553, this.MP.handle, 0));
-    a.bindFramebuffer(36160, null)
+/**
+ *
+ * @param gl webgl context
+ * @param width width
+ * @param height height
+ * @param colorConfig color texture
+ * @param depthConfig depth texture
+ */
+var Framebuffer = function (gl, width, height, colorConfig, depthConfig) {
+    this.depthTexture = this.colorTexture = null;
+    this.handle = gl.createFramebuffer();
+    this.width = width;
+    this.height = height;
+    gl.bindFramebuffer(36160, this.handle);
+    if (colorConfig) {
+        this.colorTexture = new Texture(gl, width, height, colorConfig)
+        gl.framebufferTexture2D(36160 /* GL_FRAMEBUFFER */,
+            36064 /* GL_COLOR_ATTACHMENT0 */,
+            3553 /* GL_TEXTURE_2D */,
+            this.colorTexture.handle, 0)
+    }
+    if (depthConfig) {
+        this.depthTexture = new Texture(gl, width, height, depthConfig)
+        gl.framebufferTexture2D(36160 /* GL_FRAMEBUFFER */,
+            36096 /* GL_DEPTH_ATTACHMENT */,
+            3553 /* GL_TEXTURE_2D */,
+            this.depthTexture.handle, 0)
+    }
+    gl.bindFramebuffer(36160, null)
 };
-MX.prototype.createFramebuffer = function (a, b, c, e) {
-    var f = null;
-    e && (f = {
-        type: 5123,
-        Gn: 33071,
-        filter: 9728,
-        format: 6402,
-        data: null
-    });
-    a = new $ja(this.Sc, a, b, c, f);
-    this.yQ.push(a);
-    return a
+MX.prototype.createFramebuffer = function (width, height, colorConfig, useDefault) {
+    var depthConfig = null;
+    if (useDefault) {
+        depthConfig = {
+            type: 5123,
+            wrap: 33071,
+            filter: 9728,
+            format: 6402,
+            data: null
+        }
+    }
+    const framebuffer = new Framebuffer(this.gl, width, height, colorConfig, depthConfig);
+    this.framebufferList.push(framebuffer);
+    return framebuffer
 }
 ;
 MX.prototype.createTexture = function (a, b, c) {
-    a = new NX(this.Sc, a, b, c);
-    this.RX.push(a);
+    a = new Texture(this.gl, a, b, c);
+    this.textureList.push(a);
     return a
 }
 ;
-MX.prototype.$u = function (a, b) {
-    a = this.Nx.attributes[a];
-    this.Sc.bindBuffer(34962, b.handle);
-    this.Sc.vertexAttribPointer(a, b.a1, 5126, !1, 0, 0)
+MX.prototype.bindAttributeBuffer = function (a, b) {
+    const location = this.usingProgram.attribMapping[a];
+    this.gl.bindBuffer(34962 /* GL_ARRAY_BUFFER */, b.handle);
+    this.gl.vertexAttribPointer(location, b.dimension, 5126 /* GL_FLOAT */, !1, 0, 0)
 }
 ;
 MX.prototype.Wn = function (a, b, c) {
-    this.Sc.drawArrays(a, b, c)
+    this.gl.drawArrays(a, b, c)
 }
 ;
-// Adding buffer data
-MX.prototype.e0 = function (a, b, c) {//a: Dimension b: Usage, c: Buffer data
-    a = new aka(this.Sc, a, b, c);
-    this.PO.push(a);
-    return a
+/**
+ * create buffer
+ * @param dimension
+ * @param usage
+ * @param data
+ * @returns {*}
+ */
+MX.prototype.createBuffer = function (dimension, usage, data) {//a: Dimension b: Usage, c: Buffer data
+    const buffer = new Buffer(this.gl, dimension, usage, data);
+    this.bufferList.push(buffer);
+    return buffer
 }
 ;
 MX.prototype.createProgram = function (a) {
-    a = new a(this.Sc);
-    this.iV.push(a);
-    return a
+    const program = new a(this.gl);
+    this.programList.push(program);
+    return program
 }
 ;
 // handle with buffer
-var aka = function (a, b, c, e) { // e: Buffer data.
-    this.handle = a.createBuffer();
-    this.a1 = b; // Dimension
-    this.Qt = e.length / b; // Vertex num
-    this.usage = c; // usage
-    if (0 != e.length % this.a1)
+var Buffer = function (gl, dimension, usage, data) { // e: Buffer data.
+    this.handle = gl.createBuffer();
+    this.dimension = dimension; // Dimension
+    this.vertexCount = data.length / dimension; // Vertex num
+    this.usage = usage; // usage
+    if (0 != data.length % this.dimension)
         throw Error("Number of elements is not a multiple of elementSize");
-    if (e.length != this.a1 * this.Qt)
+    if (data.length != this.dimension * this.vertexCount)
         throw Error("Unexpected number of elements");
-    a.bindBuffer(34962, this.handle);
-    a.bufferData(34962, e, this.usage)
+    gl.bindBuffer(34962, this.handle);
+    gl.bufferData(34962, data, this.usage)
 }
-var NX = function (a, b, c, e) {
-    this.width = b;
-    this.height = c;
-    this.handle = a.createTexture();
-    this.type = void 0 != e.type ? e.type : a.UNSIGNED_BYTE;
-    this.Gn = void 0 != e.Gn ? e.Gn : a.REPEAT;
-    this.filter = void 0 != e.filter ? e.filter : a.LINEAR;
-    this.format = void 0 != e.format ? e.format : a.RGBA;
-    b = void 0 != e.data ? e.data : null;
-    a.bindTexture(a.TEXTURE_2D, this.handle);
-    a.texImage2D(a.TEXTURE_2D, 0, this.format, this.width, this.height, 0, this.format, this.type, b);
-    a.texParameteri(a.TEXTURE_2D, a.TEXTURE_MAG_FILTER, this.filter);
-    a.texParameteri(a.TEXTURE_2D, a.TEXTURE_MIN_FILTER, this.filter);
-    a.texParameteri(a.TEXTURE_2D, a.TEXTURE_WRAP_S, this.Gn);
-    a.texParameteri(a.TEXTURE_2D, a.TEXTURE_WRAP_T, this.Gn)
+/**
+ * create texture
+ * @param gl the {@link WebGLRenderingContext}
+ * @param width width
+ * @param height height
+ * @param config config
+ * @constructor
+ */
+var Texture = function (gl, width, height, config) {
+    this.width = width;
+    this.height = height;
+    this.handle = gl.createTexture();
+    this.type = void 0 != config.type ? config.type : gl.UNSIGNED_BYTE;
+    this.wrap = void 0 != config.wrap ? config.wrap : gl.REPEAT;
+    this.filter = void 0 != config.filter ? config.filter : gl.LINEAR;
+    this.format = void 0 != config.format ? config.format : gl.RGBA;
+    const data = void 0 != config.data ? config.data : null;
+    gl.bindTexture(gl.TEXTURE_2D, this.handle);
+    gl.texImage2D(gl.TEXTURE_2D, 0, this.format, this.width, this.height, 0, this.format, this.type, data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this.wrap);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this.wrap)
 }
 /// Attach shader source to webgl context
-var OX = function (context, vsSource, fsSource) {
+var ShaderProgram = function (context, vsSource, fsSource) {
     this.handle = context.createProgram();
-    this.attributes = {};
+    this.attribMapping = {};
     // parameter count
-    this.We = 0;
+    this.attribCount = 0;
     // uniform name storage
-    this.Vr = {};
+    this.uniformMapping = {};
     // sampler name storage
-    this.gu = {};
+    this.samplerMapping = {};
     var e = context.createShader(context.VERTEX_SHADER)
         , f = context.createShader(context.FRAGMENT_SHADER);
     context.shaderSource(e, vsSource);
@@ -184,149 +260,150 @@ var OX = function (context, vsSource, fsSource) {
         throw Error("Error linking program:\n" + context.getProgramInfoLog(this.handle));
 };
 // getUniform
-OX.prototype.getUniform = function (a) {
-    var b = this.Vr[a];
+ShaderProgram.prototype.getUniform = function (a) {
+    var b = this.uniformMapping[a];
     if (!b)
         throw Error("No uniform named: " + a);
     return b
 }
 ;
 // getSampler
-OX.prototype.E3a = function (a) {
-    var b = this.gu[a];
+ShaderProgram.prototype.getSampler = function (a) {
+    var b = this.samplerMapping[a];
     if (!b)
         throw Error("No sampler named: " + a);
     return b
 }
 ;
 // uniform functions
-var PX = function (a, b, c) {
-    this.type = b;
-    this.UAa = c;
-    this.iT = !1;
-    switch (b) {
+var Uniform = function (gl, type, location) {
+    this.type = type;
+    this.location = location;
+    this.isMatrix = !1;
+    switch (type) {
         case 5126:
-            this.um = a.uniform1f;
+            this.setter = gl.uniform1f;
             break;
         case 35664:
-            this.um = a.uniform2fv;
+            this.setter = gl.uniform2fv;
             break;
         case 35665:
-            this.um = a.uniform3fv;
+            this.setter = gl.uniform3fv;
             break;
         case 35666:
-            this.um = a.uniform4fv;
+            this.setter = gl.uniform4fv;
             break;
         case 35670:
         case 5124:
-            this.um = a.uniform1i;
+            this.setter = gl.uniform1i;
             break;
         case 35671:
         case 35667:
-            this.um = a.uniform2iv;
+            this.setter = gl.uniform2iv;
             break;
         case 35672:
         case 35668:
-            this.um = a.uniform3iv;
+            this.setter = gl.uniform3iv;
             break;
         case 35673:
         case 35669:
-            this.um = a.uniform4iv;
+            this.setter = gl.uniform4iv;
             break;
         case 35674:
-            this.um = a.uniformMatrix2fv;
-            this.iT = !0;
+            this.setter = gl.uniformMatrix2fv;
+            this.isMatrix = !0;
             break;
         case 35675:
-            this.um = a.uniformMatrix3fv;
-            this.iT = !0;
+            this.setter = gl.uniformMatrix3fv;
+            this.isMatrix = !0;
             break;
         case 35676:
-            this.um = a.uniformMatrix4fv;
-            this.iT = !0;
+            this.setter = gl.uniformMatrix4fv;
+            this.isMatrix = !0;
             break;
         case 35678:
         case 35680:
-            this.um = a.uniform1i;
+            this.setter = gl.uniform1i;
             break;
         default:
-            throw Error("Unrecognized uniform type: " + b);
+            throw Error("Unrecognized uniform type: " + type);
     }
 }
-    , QX = function (a, b, c, e) {
-    PX.call(this, a, b, c);
-    this.Fu = e
+    , Sampler = function (a, b, c, e) {
+    Uniform.call(this, a, b, c);
+    this.textureX = e
 };
-u(QX, PX);
+u(Sampler, Uniform);
 MX.prototype.bindFramebuffer = function (a) {
-    a ? (this.Sc.bindFramebuffer(36160, a.handle),
-        this.Sc.viewport(0, 0, a.width, a.height)) : (this.Sc.bindFramebuffer(36160, null),
-        this.Sc.viewport(0, 0, this.fq.width, this.fq.height))
+    a ? (this.gl.bindFramebuffer(36160, a.handle),
+        this.gl.viewport(0, 0, a.width, a.height)) : (this.gl.bindFramebuffer(36160, null),
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height))
 }
 ;
 MX.prototype.blendColor = function (a, b, c, e) {
-    this.Sc.blendColor(a, b, c, e)
+    this.gl.blendColor(a, b, c, e)
 }
 ;
 MX.prototype.blendEquation = function (a) {
-    this.Sc.blendEquation(a)
+    this.gl.blendEquation(a)
 }
 ;
 MX.prototype.blendEquationSeparate = function (a, b) {
-    this.Sc.blendEquationSeparate(a, b)
+    this.gl.blendEquationSeparate(a, b)
 }
 ;
 MX.prototype.blendFunc = function (a, b) {
-    this.Sc.blendFunc(a, b)
+    this.gl.blendFunc(a, b)
 }
 ;
 MX.prototype.blendFuncSeparate = function (a, b, c, e) {
-    this.Sc.blendFuncSeparate(a, b, c, e)
+    this.gl.blendFuncSeparate(a, b, c, e)
 }
 ;
 MX.prototype.clear = function (a) {
-    this.Sc.clear(a)
+    this.gl.clear(a)
 }
 ;
 MX.prototype.clearColor = function (a, b, c, e) {
-    this.Sc.clearColor(a, b, c, e)
+    this.gl.clearColor(a, b, c, e)
 }
 ;
 MX.prototype.colorMask = function (a, b, c, e) {
-    this.Sc.colorMask(a, b, c, e)
+    this.gl.colorMask(a, b, c, e)
 }
 ;
 MX.prototype.depthMask = function (a) {
-    this.Sc.depthMask(a)
+    this.gl.depthMask(a)
 }
 ;
 MX.prototype.disable = function (a) {
-    this.Sc.disable(a)
+    this.gl.disable(a)
 }
 ;
 MX.prototype.enable = function (a) {
-    this.Sc.enable(a)
+    this.gl.enable(a)
 }
 ;
 MX.prototype.viewport = function (a, b, c, e) {
-    this.Sc.viewport(a, b, c, e)
+    this.gl.viewport(a, b, c, e)
 }
 ;
 MX.prototype.getExtension = function (a) {
-    return this.Sc.getExtension(a)
+    return this.gl.getExtension(a)
 }
 ;
 MX.prototype.getSupportedExtensions = function () {
-    return this.Sc.getSupportedExtensions()
+    return this.gl.getSupportedExtensions()
 }
 ;
 MX.prototype.setUniform = function (a, b) {
-    var c = this.Nx.Vr[a];
+    var c = this.usingProgram.uniformMapping[a];
     if (!c)
         throw Error('No uniform named "' + a + '"');
-    var e = this.Sc, f;
+    var e = this.gl;
+    var f;
     f = 2 == arguments.length ? b : Array.prototype.slice.call(arguments, 1);
-    c.iT ? c.um.call(e, c.UAa, !1, f) : c.um.call(e, c.UAa, f)
+    c.isMatrix ? c.setter.call(e, c.location, !1, f) : c.setter.call(e, c.location, f)
 }
 ;
 var WX = function () {
@@ -348,7 +425,7 @@ WX.prototype.Oa = function () {
         a.qb()
     });
     this.queue.length = 0;
-    WX.Aa.Oa.call(this)
+    WX.Aa.clear.call(this)
 }
 ;
 var XX = function () {
@@ -516,7 +593,7 @@ var aY = function () {
     this.FZ = this.fl = this.he = null
 };
 d = bY.prototype;
-d.Ntb = function (a, b) {
+bY.prototype.Ntb = function (a, b) {
     var c = dm("DIV", "panning-background")
         , e = dm("DIV", "panning-overlay")
         , f = dm("IMG", "panning-img");
@@ -526,11 +603,11 @@ d.Ntb = function (a, b) {
     a.appendChild(e)
 }
 ;
-d.kZ = function (a) {
+bY.prototype.kZ = function (a) {
     this.HZ(q(this.Ntb, this, a))
 }
 ;
-d.start = function (a) {
+bY.prototype.start = function (a) {
     this.lw || (this.lw = !0,
         this.kf = a,
         this.Gg.width = this.kf.offsetWidth,
@@ -557,18 +634,18 @@ d.start = function (a) {
         this.E1())
 }
 ;
-d.stop = function () {
+bY.prototype.stop = function () {
     this.lw && (this.lw = !1,
         this.ra.removeAll(),
         hm(this.Qz),
         this.pea(0))
 }
 ;
-d.c8 = function () {
+bY.prototype.c8 = function () {
     return !0
 }
 ;
-d.Yya = function (a) {
+bY.prototype.Yya = function (a) {
     a.he = null;
     a.fl = dm("DIV", "art-container");
     this.Qz.appendChild(a.fl);
@@ -576,7 +653,7 @@ d.Yya = function (a) {
     a.fl.appendChild(a.FZ)
 }
 ;
-d.y$ = function () {
+bY.prototype.y$ = function () {
     if (this.lw)
         switch (this.ta.ub) {
             case 4:
@@ -589,28 +666,28 @@ d.y$ = function () {
         }
 }
 ;
-d.pea = function (a) {
+bY.prototype.pea = function (a) {
     this.wb = this.lw ? a : 0;
     this.oj && this.oj.qb();
     return this.lw
 }
 ;
-d.HZ = function (a) {
+bY.prototype.HZ = function (a) {
     var b = this.Da.Ts();
     b ? a(b) : Oo(q(this.HZ, this, a), 500)
 }
 ;
-d.ZXa = function (a) {
+bY.prototype.ZXa = function (a) {
     this.MK = !1;
     a != this.Hm.he && (this.kib(),
         this.tyb(a))
 }
 ;
-d.E1 = function () {
+bY.prototype.E1 = function () {
     this.lw && this.MK && this.HZ(q(this.ZXa, this))
 }
 ;
-d.kib = function () {
+bY.prototype.kib = function () {
     switch (Math.floor(4 * Math.random())) {
         case 0:
             this.Tk.x = this.Th.x;
@@ -638,7 +715,7 @@ d.kib = function () {
     }
 }
 ;
-d.tyb = function (a) {
+bY.prototype.tyb = function (a) {
     if (this.pea(1)) {
         var b = this.pr;
         this.pr = this.Hm;
@@ -661,7 +738,7 @@ d.tyb = function (a) {
     }
 }
 ;
-d.Sxb = function () {
+bY.prototype.Sxb = function () {
     var a = new XX, b;
     b = this.pr.fl;
     b = new Hl(b.offsetLeft, b.offsetTop);
@@ -671,27 +748,27 @@ d.Sxb = function () {
     return a
 }
 ;
-d.oyb = function () {
+bY.prototype.oyb = function () {
     var a = new XX;
     a.add(new IU(this.pr.fl, [this.Th.x, this.Th.y], [this.Lr.x, this.Lr.y], 2E3));
     a.add(new KU(this.pr.fl, 1, .3, 2E3));
     return a
 }
 ;
-d.nyb = function () {
+bY.prototype.nyb = function () {
     var a = new XX;
     a.add(new $X(this.Hm.fl, [this.Tk.x, this.Tk.y, this.$j, this.$j], [this.Th.x, this.Th.y, this.$j, this.$j], 2E3));
     a.add(new KU(this.Hm.fl, .3, 1, 2E3));
     return a
 }
 ;
-d.GXa = function () {
+bY.prototype.GXa = function () {
     var a = new XX;
     a.add(new $X(this.Hm.fl, [this.Th.x, this.Th.y, this.$j, this.$j], [this.GE.x, this.GE.y, this.Cw, this.Cw], 2E3, LU));
     return a
 }
 ;
-d.lDa = function () {
+bY.prototype.lDa = function () {
     if (this.pea(2))
         if (this.MK)
             this.E1();
@@ -710,28 +787,33 @@ d.lDa = function () {
         }
 }
 ;
-var cY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;uniform vec4 c;void main(){a=b;vec2 d=b*c.xy+c.zw;gl_Position=vec4(d*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d;void main(){vec4 e=texture2D(d,a);gl_FragColor=e;}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
-    a.useProgram(this.handle);
-    // traverse all uniform
-    for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
-        var f = a.getActiveUniform(this.handle, e);
+/**
+ * cY
+ * @param gl the {@link WebGLRenderingContext}
+ */
+var cY = function (gl) {
+    // create program and set to this.handler
+    ShaderProgram.call(this, gl, "precision mediump float;varying vec2 a;attribute vec2 b;uniform vec4 c;void main(){a=b;vec2 d=b*c.xy+c.zw;gl_Position=vec4(d*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d;void main(){vec4 e=texture2D(d,a);gl_FragColor=e;}");
+    // only has one attribute
+    this.attribCount = 0;
+    gl.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
+    gl.useProgram(this.handle);
+    // traverse all uniform GL_ACTIVE_UNIFORMS
+    for (var b = gl.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
+        var f = gl.getActiveUniform(this.handle, e);
         if (f) {
             var name = dka[f.name];
             if (name) {
-                var location = a.getUniformLocation(this.handle, f.name)
-                    , f = f.type;
+                var location = gl.getUniformLocation(this.handle, f.name)
                 var type = f.type;
                 // if type == SAMPLER_2D or SAMPLER_CUBE
                 if (35678 == type || 35680 == type) {
-                    var qx = new QX(a, type, location, c++);
-                    a.uniform1i(location, qx.Fu);
-                    this.gu[name] = qx;
+                    var qx = new Sampler(gl, type, location, c++);
+                    gl.uniform1i(location, qx.textureX);
+                    this.samplerMapping[name] = qx;
                 } else {
-                    this.Vr[name] = new PX(a, f, location);
+                    this.uniformMapping[name] = new Uniform(gl, type, location);
                 }
                 // 35678 == f || 35680 == f ? (f = new QX(a,f,k,c++),
                 // a.uniform1i(k, f.Fu),
@@ -740,16 +822,16 @@ var cY = function (a) {
         }
     }
 };
-u(cY, OX);
+u(cY, ShaderProgram);
 var dka = {
     c: "scaleOffset",
     d: "tex"
 };
 var dY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec2 d,e;void main(){vec4 f,g,h,i,j,k,l,m,n,o,p,q,r,s,t;f=texture2D(c,a);g=texture2D(c,a-d);h=texture2D(c,a+d);i=texture2D(c,a-2.*d);j=texture2D(c,a+2.*d);k=texture2D(c,a-3.*d);l=texture2D(c,a+3.*d);m=vec4(0);n=vec4(1);o=.8521*max(m,n-.7*abs(g-f));p=.8521*max(m,n-.7*abs(h-f));q=.5273*max(m,n-2.*abs(i-f));r=.5273*max(m,n-2.*abs(j-f));s=.2369*max(m,n-2.*abs(k-f));t=.2369*max(m,n-2.*abs(l-f));f+=o*g+p*h+q*i+r*j+s*k+t*l;gl_FragColor=f/(o+p+q+r+s+t+1.);gl_FragColor.a=e.x*gl_FragColor.a+e.y;}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec2 d,e;void main(){vec4 f,g,h,i,j,k,l,m,n,o,p,q,r,s,t;f=texture2D(c,a);g=texture2D(c,a-d);h=texture2D(c,a+d);i=texture2D(c,a-2.*d);j=texture2D(c,a+2.*d);k=texture2D(c,a-3.*d);l=texture2D(c,a+3.*d);m=vec4(0);n=vec4(1);o=.8521*max(m,n-.7*abs(g-f));p=.8521*max(m,n-.7*abs(h-f));q=.5273*max(m,n-2.*abs(i-f));r=.5273*max(m,n-2.*abs(j-f));s=.2369*max(m,n-2.*abs(k-f));t=.2369*max(m,n-2.*abs(l-f));f+=o*g+p*h+q*i+r*j+s*k+t*l;gl_FragColor=f/(o+p+q+r+s+t+1.);gl_FragColor.a=e.x*gl_FragColor.a+e.y;}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -758,24 +840,24 @@ var dY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
-u(dY, OX);
+u(dY, ShaderProgram);
 var eka = {
     c: "mainTex",
     d: "duv",
     e: "alphaScaleOffset"
 };
 var eY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec3 d,e;void main(){vec4 f,i;f=texture2D(c,a);float g,h;g=.5*(f.x+f.y);h=.5*(f.z+f.w);i=vec4(d*g+e*h,g+h);gl_FragColor=2.*sqrt(i);gl_FragColor.xyz=vec3(1)-gl_FragColor.xyz;}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec3 d,e;void main(){vec4 f,i;f=texture2D(c,a);float g,h;g=.5*(f.x+f.y);h=.5*(f.z+f.w);i=vec4(d*g+e*h,g+h);gl_FragColor=2.*sqrt(i);gl_FragColor.xyz=vec3(1)-gl_FragColor.xyz;}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -784,24 +866,24 @@ var eY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
-u(eY, OX);
+u(eY, ShaderProgram);
 var fka = {
     c: "tex",
     d: "color0",
     e: "color1"
 };
 var fY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;void main(){gl_FragColor=vec4(0,-10000,0,0);}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;void main(){gl_FragColor=vec4(0,-10000,0,0);}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -810,21 +892,21 @@ var fY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
 3
-u(fY, OX);
+u(fY, ShaderProgram);
 var gka = {};
 var gY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c,d;uniform vec4 e;void main(){vec2 f=a*2.-vec2(1);float g,h;g=smoothstep(.2,5.,dot(f,f));h=texture2D(c,a*e.xy+e.zw).w;vec3 i=texture2D(d,a).xyz;i*=1.-g;gl_FragColor.xyz=abs(i-.05*h);gl_FragColor.w=1.;}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D c,d;uniform vec4 e;void main(){vec2 f=a*2.-vec2(1);float g,h;g=smoothstep(.2,5.,dot(f,f));h=texture2D(c,a*e.xy+e.zw).w;vec3 i=texture2D(d,a).xyz;i*=1.-g;gl_FragColor.xyz=abs(i-.05*h);gl_FragColor.w=1.;}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -833,24 +915,24 @@ var gY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
-u(gY, OX);
+u(gY, ShaderProgram);
 var hka = {
     c: "grainTex",
     d: "mainTex",
     e: "grainScaleOffset"
 };
 var hY = function (a) {
-    OX.call(this, a, "precision mediump float;attribute vec2 a;uniform sampler2D b;uniform mat4 c;void main(){vec4 d=texture2D(b,a);gl_Position=c*vec4(d.xyz,1);gl_PointSize=1.+min(1./gl_Position.w,64.);}", "precision mediump float;uniform float d;void main(){vec2 a=2.*(gl_PointCoord-vec2(.5));float e=1.-smoothstep(0.,1.,dot(a,a));gl_FragColor=vec4(d*e);}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "a");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;attribute vec2 a;uniform sampler2D b;uniform mat4 c;void main(){vec4 d=texture2D(b,a);gl_Position=c*vec4(d.xyz,1);gl_PointSize=1.+min(1./gl_Position.w,64.);}", "precision mediump float;uniform float d;void main(){vec2 a=2.*(gl_PointCoord-vec2(.5));float e=1.-smoothstep(0.,1.,dot(a,a));gl_FragColor=vec4(d*e);}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "a");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -859,24 +941,24 @@ var hY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
-u(hY, OX);
+u(hY, ShaderProgram);
 var ika = {
     b: "positionTex",
     c: "worldViewProj",
     d: "density"
 };
 var iY = function (a) {
-    OX.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;uniform float c;void main(){a=b*vec2(1,c);gl_Position=vec4(a*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d,e,f;uniform vec2 g,h;uniform vec3 i,j,k,l,m,n;const float o=32.;const float p=.5/(o*(o-1.));const float q=o/(o-1.);const float r=(o-1.)/(o*o);const float s=o;const float t=1./o;vec3 F(vec3 u){float v=p+floor(u.z)*t;return texture2D(f,vec2(u.x,v+fract(u.y*q)*r)).xyz;}vec3 G(vec3 u){u.z*=o;vec3 v,w,x,A,B,C,D,E;v=u*.03-g.x*vec3(.03,.05,.07);w=F(v);x=F(v+vec3(0,0,1));A=2.*mix(w,x,fract(v.z))-vec3(1);B=u*.15+g.x*vec3(.01,.02,.03);C=F(B);D=F(B+vec3(0,0,1));E=2.*mix(C,D,fract(B.z))-vec3(1);return 8.*A+5.*E+m;}vec3 H(vec4 u,vec3 v,vec3 w){vec3 x,B;x=u.xyz-v;float A=dot(x,x);B=x/(1.+A*A);B*=1.5*max(0.,dot(x,w));return B;}vec3 I(vec4 u,vec3 v,float w){vec3 x,A;x=u.xyz-v;A=(1.-smoothstep(0.,.5,u.w))*normalize(x);return A*w;}void main(){vec4 u,w;u=texture2D(d,a);float v,B,C,D;v=texture2D(e,a+h).w;w=texture2D(e,a);vec3 x,A,E;x=i-w.w*j;A=k-w.w*l;B=n.x;C=n.y;D=n.z;if(v<C)u=vec4(x+B*w.xyz,0);u.xyz+=H(u,x,j)+H(u,A,l)+I(u,x,D);E=G(u.xyz);u.xyz+=g.y*30.*.002*E;u.w+=g.y;if(u.w>2.+4.*w.w)u.y=-1e4;gl_FragColor=u;}");
-    this.We = 0;
-    a.bindAttribLocation(this.handle, this.We, "b");
-    this.attributes.uv = this.We++;
+    ShaderProgram.call(this, a, "precision mediump float;varying vec2 a;attribute vec2 b;uniform float c;void main(){a=b*vec2(1,c);gl_Position=vec4(a*2.-vec2(1),1,1);}", "precision mediump float;varying vec2 a;uniform sampler2D d,e,f;uniform vec2 g,h;uniform vec3 i,j,k,l,m,n;const float o=32.;const float p=.5/(o*(o-1.));const float q=o/(o-1.);const float r=(o-1.)/(o*o);const float s=o;const float t=1./o;vec3 F(vec3 u){float v=p+floor(u.z)*t;return texture2D(f,vec2(u.x,v+fract(u.y*q)*r)).xyz;}vec3 G(vec3 u){u.z*=o;vec3 v,w,x,A,B,C,D,E;v=u*.03-g.x*vec3(.03,.05,.07);w=F(v);x=F(v+vec3(0,0,1));A=2.*mix(w,x,fract(v.z))-vec3(1);B=u*.15+g.x*vec3(.01,.02,.03);C=F(B);D=F(B+vec3(0,0,1));E=2.*mix(C,D,fract(B.z))-vec3(1);return 8.*A+5.*E+m;}vec3 H(vec4 u,vec3 v,vec3 w){vec3 x,B;x=u.xyz-v;float A=dot(x,x);B=x/(1.+A*A);B*=1.5*max(0.,dot(x,w));return B;}vec3 I(vec4 u,vec3 v,float w){vec3 x,A;x=u.xyz-v;A=(1.-smoothstep(0.,.5,u.w))*normalize(x);return A*w;}void main(){vec4 u,w;u=texture2D(d,a);float v,B,C,D;v=texture2D(e,a+h).w;w=texture2D(e,a);vec3 x,A,E;x=i-w.w*j;A=k-w.w*l;B=n.x;C=n.y;D=n.z;if(v<C)u=vec4(x+B*w.xyz,0);u.xyz+=H(u,x,j)+H(u,A,l)+I(u,x,D);E=G(u.xyz);u.xyz+=g.y*30.*.002*E;u.w+=g.y;if(u.w>2.+4.*w.w)u.y=-1e4;gl_FragColor=u;}");
+    this.attribCount = 0;
+    a.bindAttribLocation(this.handle, this.attribCount, "b");
+    this.attribMapping.uv = this.attribCount++;
     a.useProgram(this.handle);
     for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
         var f = a.getActiveUniform(this.handle, e);
@@ -885,14 +967,14 @@ var iY = function (a) {
             if (h) {
                 var k = a.getUniformLocation(this.handle, f.name)
                     , f = f.type;
-                35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-                    a.uniform1i(k, f.Fu),
-                    this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
+                35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
+                    a.uniform1i(k, f.textureX),
+                    this.samplerMapping[h] = f) : this.uniformMapping[h] = new Uniform(a, f, k)
             }
         }
     }
 };
-u(iY, OX);
+u(iY, ShaderProgram);
 var jka = {
     c: "quality",
     d: "positionTex",
@@ -983,16 +1065,10 @@ if ("undefined" == typeof Float64Array) {
         b[2] = a[2] * c;
         return b
     }
-    , qY = function (a, b, c) {
-        var e = a[0]
-            , f = a[1];
-        a = a[2];
-        var h = b[0]
-            , k = b[1];
-        b = b[2];
-        c[0] = f * b - a * k;
-        c[1] = a * h - e * b;
-        c[2] = e * k - f * h;
+    , crossProduct = function (a, b, c) {
+        c[0] = a[1] * b[2] - a[2] * b[1];
+        c[1] = a[2] * b[0] - a[0] * b[2];
+        c[2] = a[0] * b[1] - a[1] * b[0];
         return c
     };
 var rY = function (a, b, c) {
@@ -1003,7 +1079,7 @@ var rY = function (a, b, c) {
     return a
 }
     , sY = [new Float64Array(4), new Float64Array(4), new Float64Array(4)];
-/// Get audio infomation
+/// Get audio information
 var AudioInfo = function (length) {
     this.raw = new Float32Array(length);
     this.bL = new Float32Array(length);
@@ -1066,31 +1142,31 @@ d.Yjb = function(a, b) {
 /**
  * Particles visualizer constructor
  *
- * @param a AnalyserNode {@link AnalyserNode}
- * @param b origin {@link WebGLRenderingContext}
- * @param c canvas {@link HTMLCanvasElement}
- * @param e modified {@link WebGLRenderingContext}
+ * @param analyserNode AnalyserNode {@link AnalyserNode}
+ * @param gl origin {@link WebGLRenderingContext}
+ * @param canvas canvas {@link HTMLCanvasElement}
+ * @param glContext modified {@link WebGLRenderingContext}
  * @constructor
  */
-var Particles = function (a, b, c, e) {
+var Particles = function (analyserNode, gl, canvas, glContext) {
     /**
      * {@link AnalyserNode}
      */
-    this.analyserNode = a;
+    this.analyserNode = analyserNode;
     // Canvas
-    this.canvas = c;
+    this.canvas = canvas;
     // Modified webgl context MX
-    this.glContext = e;
+    this.glContext = glContext;
     // Audio input.
     this.audioInfo = new AudioInfo(256);
-    a = 100 * Math.random();
-    b = 1;
+    const random100 = 100 * Math.random();
+    let scale = 1;
     if (320 < this.canvas.width || 320 < this.canvas.height)
-        b = 2;
+        scale = 2;
     // scaled width
-    this.width = Math.floor(this.canvas.width / b);
+    this.width = Math.floor(this.canvas.width / scale);
     // scaled height
-    this.height = Math.floor(this.canvas.height / b);
+    this.height = Math.floor(this.canvas.height / scale);
     // ratio
     this.ratio = this.width / this.height;
     this.ISa = this.glContext.createProgram(dY);
@@ -1102,23 +1178,23 @@ var Particles = function (a, b, c, e) {
     this.rBb = this.glContext.createProgram(iY);
     this.noiseText = this.createNoiseTex(32); // noiseTex
     const random = new Uint8Array(16384);
-    for (c = 0; c < b.length; ++c)
-        random[c] = Math.floor(255 * Math.random());
+    for (let i = 0; i < random.length; ++i)
+        random[i] = Math.floor(255 * Math.random());
     this.grainTex = this.glContext.createTexture(128, 128, {
         filter: 9728, // NEAREST
         data: random,
         type: 5121, // UNSIGNED_BYTE
         format: 6406, // ALPHA
-        Gn: 10497 // REPEAT
+        wrap: 10497 // REPEAT
     });
-    b = {
+    const colorConfig = {
         filter: 9729, // LINEAR
-        Gn: 33071 // CLAMP_TO_EDGE
+        wrap: 33071 // CLAMP_TO_EDGE
     };
-    this.ZT = this.glContext.createFramebuffer(this.width, this.height, b, !1);
-    this.Lja = this.glContext.createFramebuffer(this.width, this.height, b, !1);
-    this.dia = this.glContext.createFramebuffer(this.width, this.height, b, !1);
-    this.Ji = this.glContext.e0(2, 35044, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
+    this.ZT = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+    this.Lja = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+    this.dia = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+    this.buffer = this.glContext.createBuffer(2, 35044 /*GL_STATIC_DRAW*/, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
     this.jB = 60 * Math.random();
     this.UY = null;
     this.Jt = new Float32Array(3);
@@ -1128,20 +1204,20 @@ var Particles = function (a, b, c, e) {
     this.eA = .5;
     this.iBa = !1;
     this.sU = this.tU = 0;
-    b = new uY(this.glContext, 512, 1024);
-    this.Si = [new vY(this.glContext, b, 0, 20, a), new vY(this.glContext, b, 20, 200, a + 50 + 50 * Math.random())];
+    const someTexture = new uY(this.glContext, 512, 1024);
+    this.Si = [new vY(this.glContext, someTexture, 0, 20, random100), new vY(this.glContext, someTexture, 20, 200, random100 + 50 + 50 * Math.random())];
     this.glContext.colorMask(!0, !0, !0, !0);
     this.glContext.depthMask(!1);
     this.glContext.disable(2929); // DEPTH_TEST
     this.glContext.disable(2884); // CULL_FACE
     this.glContext.disable(3042); // BLEND
-    this.glContext.Lx(this.Kab);
-    this.glContext.$u("uv", this.Ji);
-    for (c = 0; c < this.Si.length; ++c)
-        this.glContext.bindFramebuffer(this.Si[c].Tt),
-            this.glContext.Wn(4, 0, this.Ji.Qt),
-            this.glContext.bindFramebuffer(this.Si[c].gV),
-            this.glContext.Wn(4, 0, this.Ji.Qt);
+    this.glContext.activateProgram(this.Kab);
+    this.glContext.bindAttributeBuffer("uv", this.buffer);
+    for (canvas = 0; canvas < this.Si.length; ++canvas)
+        this.glContext.bindFramebuffer(this.Si[canvas].Tt),
+            this.glContext.Wn(4, 0, this.buffer.vertexCount),
+            this.glContext.bindFramebuffer(this.Si[canvas].gV),
+            this.glContext.Wn(4, 0, this.buffer.vertexCount);
     this.Wab()
 };
 u(Particles, Updatable); // inherit from UX. UX.prototype.update = function() {};
@@ -1260,7 +1336,7 @@ Particles.prototype.lBb = function (a) {
     this.glContext.disable(2929);
     this.glContext.disable(2884);
     this.glContext.disable(3042);
-    this.glContext.Lx(this.rBb);
+    this.glContext.activateProgram(this.rBb);
     this.glContext.bindTexture("noiseTex", this.noiseText);
     this.glContext.setUniform("time", this.jB, a);
     this.glContext.setUniform("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
@@ -1275,16 +1351,16 @@ Particles.prototype.lBb = function (a) {
         c.Tt = k;
         k = Math.floor(this.eA * c.Tt.height) / c.Tt.height;
         this.glContext.bindFramebuffer(c.Tt);
-        this.glContext.bindTexture("randomTex", c.maa);
-        this.glContext.bindTexture("positionTex", c.gV.jq);
-        this.glContext.$u("uv", this.Ji);
+        this.glContext.bindTexture("randomTex", c.texture);
+        this.glContext.bindTexture("positionTex", c.gV.colorTexture);
+        this.glContext.bindAttributeBuffer("uv", this.buffer);
         this.glContext.setUniform("emitterSize", .01 + f, h, a * e * 30);
         this.glContext.setUniform("pos0", this.Si[b].position);
         this.glContext.setUniform("vel0", this.Si[b].gha);
         this.glContext.setUniform("pos1", this.Si[1 - b].position);
         this.glContext.setUniform("vel1", this.Si[1 - b].gha);
         this.glContext.setUniform("quality", k);
-        this.glContext.Wn(4, 0, this.Ji.Qt) // drawArrays
+        this.glContext.Wn(4, 0, this.buffer.vertexCount) // drawArrays
     }
 }
 ;
@@ -1318,11 +1394,11 @@ Particles.prototype.Tlb = function () {
     vec3Div(e, e);
     e[3] = 0;
     f = sY[1];
-    qY(e, [0, 1, 0], f);
+    crossProduct(e, [0, 1, 0], f);
     vec3Div(f, f);
     f[3] = 0;
     var k = sY[2];
-    qY(f, e, k);
+    crossProduct(f, e, k);
     vec3Div(k, k);
     k[3] = 0;
     e[0] = -e[0];
@@ -1399,15 +1475,15 @@ Particles.prototype.Tlb = function () {
     this.glContext.enable(3042);
     this.glContext.blendEquation(32774);
     this.glContext.blendFunc(1, 1);
-    this.glContext.Lx(this.Ulb);
+    this.glContext.activateProgram(this.Ulb);
     this.glContext.setUniform("worldViewProj", c);
     c = this.canvas.height / 450 / (256 * this.eA);
     c = Math.max(c, 2 / 255);
     this.glContext.setUniform("density", c);
     for (c = 0; 2 > c; ++c)
         a = this.Si[c],
-            this.glContext.bindTexture("positionTex", a.Tt.jq),
-            this.glContext.$u("uv", a.hha),
+            this.glContext.bindTexture("positionTex", a.Tt.colorTexture),
+            this.glContext.bindAttributeBuffer("uv", a.buffer),
             a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
             e = Math.floor(a / 2),
             0 == c ? (this.glContext.colorMask(!0, !1, !1, !1),
@@ -1419,12 +1495,12 @@ Particles.prototype.Tlb = function () {
     this.glContext.colorMask(!0, !0, !0, !0);
     this.glContext.disable(3042);
     this.glContext.bindFramebuffer(this.Lja);
-    this.glContext.Lx(this.KUa);
-    this.glContext.bindTexture("tex", this.ZT.jq);
-    this.glContext.$u("uv", this.Ji);
+    this.glContext.activateProgram(this.KUa);
+    this.glContext.bindTexture("tex", this.ZT.colorTexture);
+    this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("color0", this.Nma(.05 * this.jB, .85));
     this.glContext.setUniform("color1", this.Nma(.05 * this.jB + 2, .85));
-    this.glContext.Wn(4, 0, this.Ji.Qt)
+    this.glContext.Wn(4, 0, this.buffer.vertexCount)
 }
 ;
 // init component
@@ -1432,28 +1508,28 @@ Particles.prototype.tc = function () {
     this.Tlb();
     this.glContext.disable(3042); // GL_BLEND
     this.glContext.bindFramebuffer(this.ZT);
-    this.glContext.Lx(this.ISa);
-    this.glContext.bindTexture("mainTex", this.Lja.jq);
-    this.glContext.$u("uv", this.Ji);
+    this.glContext.activateProgram(this.ISa);
+    this.glContext.bindTexture("mainTex", this.Lja.colorTexture);
+    this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("duv", 1 / this.width, 0);
     this.glContext.setUniform("alphaScaleOffset", 1, 0);
-    this.glContext.Wn(4, 0, this.Ji.Qt);
+    this.glContext.Wn(4, 0, this.buffer.vertexCount);
     this.glContext.enable(3042);
     this.glContext.blendFunc(770, 771);
     this.glContext.bindFramebuffer(this.dia);
-    this.glContext.bindTexture("mainTex", this.ZT.jq);
-    this.glContext.$u("uv", this.Ji);
+    this.glContext.bindTexture("mainTex", this.ZT.colorTexture);
+    this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("duv", 0, 1 / this.height);
     this.glContext.setUniform("alphaScaleOffset", .25, .75);
-    this.glContext.Wn(4, 0, this.Ji.Qt);
+    this.glContext.Wn(4, 0, this.buffer.vertexCount);
     this.glContext.disable(3042);
     this.glContext.bindFramebuffer(null);
-    this.glContext.Lx(this.Oib);
-    this.glContext.bindTexture("mainTex", this.dia.jq);
+    this.glContext.activateProgram(this.Oib);
+    this.glContext.bindTexture("mainTex", this.dia.colorTexture);
     this.glContext.bindTexture("grainTex", this.grainTex);
-    this.glContext.$u("uv", this.Ji);
+    this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("grainScaleOffset", this.canvas.width / this.grainTex.width, this.canvas.height / this.grainTex.height, Math.random(), Math.random());
-    this.glContext.Wn(4, 0, this.Ji.Qt)
+    this.glContext.Wn(4, 0, this.buffer.vertexCount)
 }
 ;
 Particles.prototype.Wab = function () {
@@ -1476,70 +1552,78 @@ Particles.prototype.HAb = function () {
 }
 ;
 var uY = function (a, b, c) {
-    this.mN = b;
-    this.kN = c;
-    this.y9 = b * c;
-    this.maa = this.jVa(a);
-    this.hha = this.tVa(a)
+    this.width = b;
+    this.height = c;
+    this.size = b * c;
+    this.texture = this.createRandomTexture(a);
+    this.buffer = this.createGradientBuffer(a)
 };
-uY.prototype.jVa = function (a) {
-    for (var b = this.mN, c = this.kN, e = new Float32Array(b * c * 4), f = Math.floor(e.length / 8), h = 0; h < f;) {
+uY.prototype.createRandomTexture = function (a) {
+    for (var b = this.width, c = this.height, vector4List = new Float32Array(b * c * 4), f = Math.floor(vector4List.length / 8), h = 0; h < f;) {
         var k, m, p;
         do
             k = 2 * Math.random() - 1,
                 m = 2 * Math.random() - 1,
                 p = 2 * Math.random() - 1;
         while (1 < k * k + m * m + p * p);
-        e[h++] = k;
-        e[h++] = m;
-        e[h++] = p;
-        e[h++] = Math.random()
+        vector4List[h++] = k;
+        vector4List[h++] = m;
+        vector4List[h++] = p;
+        vector4List[h++] = Math.random()
     }
-    for (var r = [-1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1], A = 0; f < e.length;)
-        for (k = e[A++],
-                 m = e[A++],
-                 p = e[A++],
+    for (var r = [-1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1], A = 0; f < vector4List.length;)
+        for (k = vector4List[A++],
+                 m = vector4List[A++],
+                 p = vector4List[A++],
                  A++,
                  h = 0; h < r.length;)
-            e[f++] = k * r[h++],
-                e[f++] = m * r[h++],
-                e[f++] = p * r[h++],
-                e[f++] = Math.random();
+            vector4List[f++] = k * r[h++],
+                vector4List[f++] = m * r[h++],
+                vector4List[f++] = p * r[h++],
+                vector4List[f++] = Math.random();
     return a.createTexture(b, c, {
         filter: 9728,
-        data: e,
+        data: vector4List,
         type: 5126,
-        Gn: 10497
+        wrap: 10497
     })
 }
 ;
-uY.prototype.tVa = function (a) {
-    for (var b = new Float32Array(2 * this.y9), c = 0, e = 0; e < this.kN; ++e)
-        for (var f = 0; f < this.mN; ++f) {
-            var h = f / this.mN
-                , k = e / this.kN;
+uY.prototype.createGradientBuffer = function (a) {
+    for (var b = new Float32Array(2 * this.size), c = 0, e = 0; e < this.height; ++e)
+        for (var f = 0; f < this.width; ++f) {
+            var h = f / this.width
+                , k = e / this.height;
             b[c++] = h;
             b[c++] = k
         }
-    return a.e0(2, 35044, b)
+    return a.createBuffer(2, 35044, b)
 }
 ;
-var vY = function (a, b, c, e, f) {
+/**
+ *
+ * @param gl
+ * @param b
+ * @param c
+ * @param e
+ * @param f
+ */
+var vY = function (gl, b, c, e, f) {
     this.doa = c;
     this.tfa = this.RV = 0;
     this.MX = f;
     this.position = new Float32Array(3);
     this.gha = new Float32Array(3);
     this.TE = [new Float32Array(e - c), new Float32Array(e - c)];
-    this.y9 = b.y9;
-    this.maa = b.maa;
+    this.size = b.size;
+    this.texture = b.texture;
     c = {
         type: 5126,
         filter: 9728
     };
-    this.Tt = a.createFramebuffer(b.mN, b.kN, c, !1);
-    this.gV = a.createFramebuffer(b.mN, b.kN, c, !1);
-    this.hha = b.hha;
+    this.Tt = gl.createFramebuffer(b.width, b.height, c, !1);
+    this.gV = gl.createFramebuffer(b.width, b.height, c, !1);
+    this.buffer = b.buffer;
     this.sMa(0)
 };
 vY.prototype.update = function (a, b) {
@@ -1582,9 +1666,9 @@ vY.prototype.czb = function () {
 
 /// AnalyserNode
 var EY = function () {
-    this.Azb = Date.now()
+    this.createTime = Date.now()
 };
-EY.prototype.jaa = function (a) {
+EY.prototype.normalize = function (a) {
     if (0 > a || 1 < a)
         return 0;
     a = .25 > a ? a / .25 : 1 - (a - .25) / .75;
@@ -1592,12 +1676,12 @@ EY.prototype.jaa = function (a) {
 }
 ;
 EY.prototype.getFloatFrequencyData = function (a) {
-    var b = (Date.now() - this.Azb) / 1E3 * .8 % 1
+    var b = (Date.now() - this.createTime) / 1E3 * .8 % 1
         , c = 0
         , e = 0;
-    .5 > b ? c = this.jaa(2 * b) : e = this.jaa(2 * (b - .5));
+    .5 > b ? c = this.normalize(2 * b) : e = this.normalize(2 * (b - .5));
     for (var b = a.length / 16, f = Math.log(10), h = 0; h < a.length; ++h) {
-        var k = (.2 + .5 * e + c * this.jaa(h / b)) / 1.7;
+        var k = (.2 + .5 * e + c * this.normalize(h / b)) / 1.7;
         a[h] = 0 < k ? 20 * Math.log(k) / f : -1E3
     }
 }
