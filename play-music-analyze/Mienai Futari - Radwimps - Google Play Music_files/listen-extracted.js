@@ -167,7 +167,7 @@ MX.prototype.bindAttributeBuffer = function (a, b) {
     this.gl.vertexAttribPointer(location, b.dimension, 5126 /* GL_FLOAT */, !1, 0, 0)
 }
 ;
-MX.prototype.Wn = function (a, b, c) {
+MX.prototype.drawArrays = function (a, b, c) {
     this.gl.drawArrays(a, b, c)
 }
 ;
@@ -1169,13 +1169,13 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
     this.height = Math.floor(this.canvas.height / scale);
     // ratio
     this.ratio = this.width / this.height;
-    this.ISa = this.glContext.createProgram(dY);
+    this.dyProgram = this.glContext.createProgram(dY);
     this.glContext.createProgram(cY);
-    this.KUa = this.glContext.createProgram(eY);
-    this.Kab = this.glContext.createProgram(fY);
-    this.Oib = this.glContext.createProgram(gY);
-    this.Ulb = this.glContext.createProgram(hY);
-    this.rBb = this.glContext.createProgram(iY);
+    this.eyProgram = this.glContext.createProgram(eY);
+    this.fyProgram = this.glContext.createProgram(fY);
+    this.gyProgram = this.glContext.createProgram(gY);
+    this.hyProgram = this.glContext.createProgram(hY);
+    this.iyProgram = this.glContext.createProgram(iY);
     this.noiseText = this.createNoiseTex(32); // noiseTex
     const random = new Uint8Array(16384);
     for (let i = 0; i < random.length; ++i)
@@ -1211,13 +1211,13 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
     this.glContext.disable(2929); // DEPTH_TEST
     this.glContext.disable(2884); // CULL_FACE
     this.glContext.disable(3042); // BLEND
-    this.glContext.activateProgram(this.Kab);
+    this.glContext.activateProgram(this.fyProgram);
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     for (canvas = 0; canvas < this.Si.length; ++canvas)
         this.glContext.bindFramebuffer(this.Si[canvas].Tt),
-            this.glContext.Wn(4, 0, this.buffer.vertexCount),
+            this.glContext.drawArrays(4, 0, this.buffer.vertexCount),
             this.glContext.bindFramebuffer(this.Si[canvas].gV),
-            this.glContext.Wn(4, 0, this.buffer.vertexCount);
+            this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
     this.Wab()
 };
 u(Particles, Updatable); // inherit from UX. UX.prototype.update = function() {};
@@ -1336,7 +1336,7 @@ Particles.prototype.lBb = function (a) {
     this.glContext.disable(2929);
     this.glContext.disable(2884);
     this.glContext.disable(3042);
-    this.glContext.activateProgram(this.rBb);
+    this.glContext.activateProgram(this.iyProgram);
     this.glContext.bindTexture("noiseTex", this.noiseText);
     this.glContext.setUniform("time", this.jB, a);
     this.glContext.setUniform("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
@@ -1360,7 +1360,7 @@ Particles.prototype.lBb = function (a) {
         this.glContext.setUniform("pos1", this.Si[1 - b].position);
         this.glContext.setUniform("vel1", this.Si[1 - b].gha);
         this.glContext.setUniform("quality", k);
-        this.glContext.Wn(4, 0, this.buffer.vertexCount) // drawArrays
+        this.glContext.drawArrays(4, 0, this.buffer.vertexCount) // drawArrays
     }
 }
 ;
@@ -1475,7 +1475,7 @@ Particles.prototype.Tlb = function () {
     this.glContext.enable(3042);
     this.glContext.blendEquation(32774);
     this.glContext.blendFunc(1, 1);
-    this.glContext.activateProgram(this.Ulb);
+    this.glContext.activateProgram(this.hyProgram);
     this.glContext.setUniform("worldViewProj", c);
     c = this.canvas.height / 450 / (256 * this.eA);
     c = Math.max(c, 2 / 255);
@@ -1487,20 +1487,20 @@ Particles.prototype.Tlb = function () {
             a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
             e = Math.floor(a / 2),
             0 == c ? (this.glContext.colorMask(!0, !1, !1, !1),
-                this.glContext.Wn(0, 0, e),
+                this.glContext.drawArrays(0, 0, e),
                 this.glContext.colorMask(!1, !0, !1, !1)) : (this.glContext.colorMask(!1, !1, !0, !1),
-                this.glContext.Wn(0, 0, e),
+                this.glContext.drawArrays(0, 0, e),
                 this.glContext.colorMask(!1, !1, !1, !0)),
-            this.glContext.Wn(0, e, a - e);
+            this.glContext.drawArrays(0, e, a - e);
     this.glContext.colorMask(!0, !0, !0, !0);
     this.glContext.disable(3042);
     this.glContext.bindFramebuffer(this.Lja);
-    this.glContext.activateProgram(this.KUa);
+    this.glContext.activateProgram(this.eyProgram);
     this.glContext.bindTexture("tex", this.ZT.colorTexture);
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("color0", this.Nma(.05 * this.jB, .85));
     this.glContext.setUniform("color1", this.Nma(.05 * this.jB + 2, .85));
-    this.glContext.Wn(4, 0, this.buffer.vertexCount)
+    this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
 }
 ;
 // init component
@@ -1508,12 +1508,12 @@ Particles.prototype.tc = function () {
     this.Tlb();
     this.glContext.disable(3042); // GL_BLEND
     this.glContext.bindFramebuffer(this.ZT);
-    this.glContext.activateProgram(this.ISa);
+    this.glContext.activateProgram(this.dyProgram);
     this.glContext.bindTexture("mainTex", this.Lja.colorTexture);
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("duv", 1 / this.width, 0);
     this.glContext.setUniform("alphaScaleOffset", 1, 0);
-    this.glContext.Wn(4, 0, this.buffer.vertexCount);
+    this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
     this.glContext.enable(3042);
     this.glContext.blendFunc(770, 771);
     this.glContext.bindFramebuffer(this.dia);
@@ -1521,15 +1521,15 @@ Particles.prototype.tc = function () {
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("duv", 0, 1 / this.height);
     this.glContext.setUniform("alphaScaleOffset", .25, .75);
-    this.glContext.Wn(4, 0, this.buffer.vertexCount);
+    this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
     this.glContext.disable(3042);
     this.glContext.bindFramebuffer(null);
-    this.glContext.activateProgram(this.Oib);
+    this.glContext.activateProgram(this.gyProgram);
     this.glContext.bindTexture("mainTex", this.dia.colorTexture);
     this.glContext.bindTexture("grainTex", this.grainTex);
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("grainScaleOffset", this.canvas.width / this.grainTex.width, this.canvas.height / this.grainTex.height, Math.random(), Math.random());
-    this.glContext.Wn(4, 0, this.buffer.vertexCount)
+    this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
 }
 ;
 Particles.prototype.Wab = function () {
