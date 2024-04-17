@@ -1,10 +1,10 @@
 precision mediump float;
 varying vec2 a;
-attribute vec2 b;
+attribute vec2 uv;
 void main()
 {
-    a = b;
-    gl_Position = vec4(b * 2. - vec2(1), 1, 1);
+    a = uv;
+    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
 }
 
 precision mediump float;
