@@ -1,3 +1,6 @@
 reference
 dist
 scripts
+
+# esbuild-plugin-glslx generated files
+*.glslx.d.ts
