@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "dist",
+    "noImplicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "allowJs": true,
+    "moduleResolution": "node"
+  },
+  "include": [
+    "src/**/*.ts",
+    "scripts/**/*.js",
+    ".eslintrc.js"
+  ],
+}

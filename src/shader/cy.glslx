@@ -1,0 +1,19 @@
+precision mediump float;
+varying vec2 a;
+attribute vec2 b;
+uniform vec4 scaleOffset;
+
+export void vertex()
+{
+    a = b;
+    vec2 d = b * scaleOffset.xy + scaleOffset.zw;
+    gl_Position = vec4(d * 2. - vec2(1), 1, 1);
+}
+
+uniform sampler2D tex;
+
+export void fragment()
+{
+    vec4 e = texture2D(tex, a);
+    gl_FragColor = e;
+}

@@ -200,3 +200,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# esbuild-plugin-glslx generated files
+*.glslx.d.ts
