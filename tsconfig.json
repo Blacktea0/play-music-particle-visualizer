@@ -11,7 +11,9 @@
   },
   "include": [
     "src/**/*.ts",
+    "test/**/*.ts",
     "scripts/**/*.js",
-    ".eslintrc.js"
+    ".eslintrc.js",
+    "jest.config.js"
   ],
 }
