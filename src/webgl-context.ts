@@ -1,18 +1,18 @@
-class Uniform {
+export class Uniform {
   readonly type: GLenum
   readonly location: WebGLUniformLocation
   readonly isMatrix: boolean
   readonly setter: ((location: WebGLUniformLocation, x: GLfloat) => void) |
-  ((location: WebGLUniformLocation, x: Float32List) => void) |
-  ((location: WebGLUniformLocation, v: Int32List) => void) |
-  ((location: WebGLUniformLocation, transpose: boolean, value: Float32List) => void)
+    ((location: WebGLUniformLocation, x: Float32List) => void) |
+    ((location: WebGLUniformLocation, v: Int32List) => void) |
+    ((location: WebGLUniformLocation, transpose: boolean, value: Float32List) => void)
 
   constructor (gl: WebGLRenderingContext, type: GLenum, location: WebGLUniformLocation) {
-    /* eslint @typescript-eslint/unbound-method: "off" */
     this.type = type
     this.location = location
     this.isMatrix = false
     switch (type) {
+      /* eslint-disable @typescript-eslint/unbound-method */
       case WebGLRenderingContext.FLOAT:
         this.setter = gl.uniform1f
         break
@@ -59,11 +59,12 @@ class Uniform {
         break
       default:
         throw Error('Unrecognized uniform type: ' + type)
+      /* eslint-enable @typescript-eslint/unbound-method */
     }
   }
 }
 
-class Sampler extends Uniform {
+export class Sampler extends Uniform {
   readonly textureX: GLint
 
   constructor (gl: WebGLRenderingContext, type: GLenum, location: WebGLUniformLocation, textureX: number) {
@@ -72,7 +73,7 @@ class Sampler extends Uniform {
   }
 }
 
-class ShaderProgram {
+export class ShaderProgram {
   readonly handle: WebGLProgram
   attribCount: number = 0
   readonly attribMapping: Record<string, GLint> = {}
@@ -117,6 +118,37 @@ class ShaderProgram {
     }
   }
 
+  protected initVariableMapping (gl: WebGLRenderingContext, reverseRenaming: {[k in string]: string}) {
+    gl.useProgram(this.handle)
+    const activeAttributes = gl.getProgramParameter(this.handle, WebGLRenderingContext.ACTIVE_ATTRIBUTES)
+    for (let i = 0; i < activeAttributes; i++) {
+      const attrib = gl.getActiveAttrib(this.handle, i)
+      if (attrib == null) {
+        throw Error('Failed to get active attribute')
+      }
+      gl.bindAttribLocation(this.handle, i, attrib.name)
+      this.attribMapping[reverseRenaming[attrib.name]] = this.attribCount++
+    }
+    const activeUniforms = gl.getProgramParameter(this.handle, WebGLRenderingContext.ACTIVE_UNIFORMS)
+    for (let i = 0; i < activeUniforms; i++) {
+      const uniform = gl.getActiveUniform(this.handle, i)
+      if (uniform == null) {
+        throw Error('Failed to get active uniform')
+      }
+      gl.getUniformLocation(this.handle, uniform.name)
+      const type = uniform.type
+      const name = reverseRenaming[uniform.name]
+      let samplerCount = 0;
+      if (type === WebGLRenderingContext.SAMPLER_2D || type === WebGLRenderingContext.SAMPLER_CUBE) {
+        const sampler = new Sampler(gl, type, location, samplerCount++)
+        gl.uniform1i(location, sampler.textureX)
+        this.samplerMapping[name] = sampler
+      } else {
+        this.uniformMapping[name] = new Uniform(gl, type, location)
+      }
+    }
+  }
+
   getUniform (name: string): Uniform {
     const uniform = this.uniformMapping[name]
     if (uniform == null) {
@@ -134,20 +166,20 @@ class ShaderProgram {
   }
 }
 
-type ShaderProgramConstructor = new (gl: WebGLRenderingContext) => ShaderProgram
+export type ShaderProgramConstructor = new (gl: WebGLRenderingContext) => ShaderProgram
 
-class Texture {
+export class Texture {
   readonly gl: WebGLRenderingContext
   readonly width: number
   readonly height: number
-  readonly config: TextureConfig
+  readonly config: TextureOptions
   readonly handle: WebGLTexture
   private readonly type: number
   private readonly wrap: number
   private readonly filter: number
   private readonly format: number
 
-  constructor (gl: WebGLRenderingContext, width: number, height: number, config: TextureConfig) {
+  constructor (gl: WebGLRenderingContext, width: number, height: number, config: TextureOptions) {
     this.gl = gl
     this.width = width
     this.height = height
@@ -172,15 +204,19 @@ class Texture {
   }
 }
 
-class TextureConfig {
-  readonly type: GLenum
-  readonly wrap: GLenum
-  readonly filter: GLenum
-  readonly format: GLenum
-  readonly data: Uint8Array | null
+export class TextureOptions {
+  readonly type: GLenum | null = null
+  readonly wrap: GLenum | null = null
+  readonly filter: GLenum | null = null
+  readonly format: GLenum | null = null
+  readonly data: Uint8Array | null = null
+
+  constructor (data: Uint8Array) {
+    this.data = data
+  }
 }
 
-class Framebuffer {
+export class Framebuffer {
   readonly depthTexture: Texture | null = null
   readonly colorTexture: Texture | null = null
   readonly handle: WebGLFramebuffer
@@ -188,7 +224,7 @@ class Framebuffer {
   readonly height: number
 
   constructor (gl: WebGLRenderingContext, width: number, height: number,
-    colorConfig: TextureConfig | null, depthConfig: TextureConfig | null) {
+    colorConfig: TextureOptions | null, depthConfig: TextureOptions | null) {
     const framebuffer = gl.createFramebuffer()
     if (framebuffer == null) {
       throw Error('Failed to framebuffer')
@@ -215,7 +251,7 @@ class Framebuffer {
   }
 }
 
-class Buffer {
+export class Buffer {
   handle: WebGLBuffer
   dimension: number
   vertexCount: number
@@ -241,7 +277,7 @@ class Buffer {
   }
 }
 
-class WebGLContext {
+export class WebGLContext {
   canvas: HTMLCanvasElement
   gl: WebGLRenderingContext
   usingProgram: ShaderProgram | null
@@ -322,7 +358,7 @@ class WebGLContext {
     }
   }
 
-  createFramebuffer (width: number, height: number, colorConfig: TextureConfig, useDefault: boolean): Framebuffer {
+  createFramebuffer (width: number, height: number, colorConfig: TextureOptions, useDefault: boolean): Framebuffer {
     let depthConfig = null
     if (useDefault) {
       depthConfig = {
@@ -338,7 +374,7 @@ class WebGLContext {
     return framebuffer
   }
 
-  createTexture (width: number, height: number, config: TextureConfig): Texture {
+  createTexture (width: number, height: number, config: TextureOptions): Texture {
     const texture = new Texture(this.gl, width, height, config)
     this.textureList.push(texture)
     return texture
@@ -448,5 +484,3 @@ class WebGLContext {
     }
   }
 }
-
-export { Uniform, Sampler, Buffer, Framebuffer, ShaderProgram, Texture, TextureConfig, WebGLContext }
