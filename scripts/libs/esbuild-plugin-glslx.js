@@ -80,7 +80,15 @@ module.exports = ({
       for (const key in json.renaming) {
         ts += ` readonly ${key}: string;`
       }
-      ts += ' };'
+      ts += ' };\n'
+
+      const f = obj => Object.fromEntries(Object.entries(obj).map(a => a.reverse()))
+      js += `export var reverseRenaming = ${JSON.stringify(f(json.renaming))};\n`
+      ts += 'export const reverseRenaming: {'
+      for (const key in json.renaming) {
+        ts += ` readonly ${json.renaming[key]}: string;`
+      }
+      ts += ' };\n'
       if (writeTypeDeclarations) {
         await fs.promises.writeFile(args.path + '.d.ts', ts)
       }
