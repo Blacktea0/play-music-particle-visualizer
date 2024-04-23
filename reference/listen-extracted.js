@@ -1057,7 +1057,7 @@ if ("undefined" == typeof Float64Array) {
     c[2] = a[2] * b;
     return c
   }
-  , vec3Div = function (a, b) {
+  , normalizeVector = function (a, b) {
     var c = a[0]
       , e = a[1]
       , f = a[2]
@@ -1073,7 +1073,7 @@ if ("undefined" == typeof Float64Array) {
     c[2] = a[0] * b[1] - a[1] * b[0];
     return c
   };
-var rY = function (a, b, c) {
+var setMatrix4Column = function (a, b, c) {
   a[b] = c[0];
   a[b + 4] = c[1];
   a[b + 8] = c[2];
@@ -1087,7 +1087,7 @@ var AudioInfo = function (length) {
   this.bL = new Float32Array(length);
   this.S$ = new Float32Array(length)
 };
-AudioInfo.prototype.syb = function (a, b, c) {
+AudioInfo.prototype.applyGaussianBlur = function (a, b, c) {
   for (var e = Math.min(a.length, b.length), f = 0; f < e; ++f) {
     for (var h = 0, k = 0, m = -c; m <= c; ++m) {
       var p = f + m;
@@ -1101,7 +1101,7 @@ AudioInfo.prototype.syb = function (a, b, c) {
   }
 }
 ;
-AudioInfo.prototype.UAb = function (a) {
+AudioInfo.prototype.updateAudioData = function (a) {
   for (var b = 0; b < this.S$.length; ++b)
     this.S$[b] = this.raw[b];
   a.getFloatFrequencyData(this.raw);
@@ -1110,7 +1110,7 @@ AudioInfo.prototype.UAb = function (a) {
     var c = Math.max(0, 20 * Math.pow(10, .05 * this.raw[b]));
     this.raw[b] = c + (c > a ? .1 : .8) * (a - c)
   }
-  this.syb(this.raw, this.bL, 8);
+  this.applyGaussianBlur(this.raw, this.bL, 8);
   for (b = 0; b < this.bL.length; ++b)
     this.bL[b] = Math.max(0, 2 * this.raw[b] - this.bL[b])
 }
@@ -1171,14 +1171,14 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
   this.height = Math.floor(this.canvas.height / scale);
   // ratio
   this.ratio = this.width / this.height;
-  this.dyProgram = this.glContext.createProgram(dY);
+  this.particleUpdateProgram = this.glContext.createProgram(dY);
   this.glContext.createProgram(cY);
-  this.eyProgram = this.glContext.createProgram(eY);
-  this.fyProgram = this.glContext.createProgram(fY);
-  this.gyProgram = this.glContext.createProgram(gY);
-  this.hyProgram = this.glContext.createProgram(hY);
-  this.iyProgram = this.glContext.createProgram(iY);
-  this.noiseText = this.createNoiseTex(32); // noiseTex
+  this.colorBlendProgram = this.glContext.createProgram(eY);
+  this.renderParticleSystemProgram = this.glContext.createProgram(fY);
+  this.finalRenderProgram = this.glContext.createProgram(gY);
+  this.alphaMaskProgram = this.glContext.createProgram(hY);
+  this.particleSimulationProgram = this.glContext.createProgram(iY);
+  this.noiseTexture = this.createNoiseTexture(32); // noiseTex
   const random = new Uint8Array(16384);
   for (let i = 0; i < random.length; ++i)
     random[i] = Math.floor(255 * Math.random());
@@ -1193,34 +1193,34 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
     filter: 9729, // LINEAR
     wrap: 33071 // CLAMP_TO_EDGE
   };
-  this.ZT = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
-  this.Lja = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
-  this.dia = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+  this.particleRenderFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+  this.colorBlendFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
+  this.alphaBlendFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
   this.buffer = this.glContext.createBuffer(2, 35044 /*GL_STATIC_DRAW*/, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
-  this.jB = 60 * Math.random();
-  this.UY = null;
-  this.Jt = new Float32Array(3);
-  this.pna = createVec3(0, 0, 0);
-  this.dI = new Float32Array(80);
-  this.xQ = 0;
-  this.eA = .5;
-  this.iBa = !1;
-  this.sU = this.tU = 0;
-  const someTexture = new uY(this.glContext, 512, 1024);
-  this.Si = [new vY(this.glContext, someTexture, 0, 20, random100), new vY(this.glContext, someTexture, 20, 200, random100 + 50 + 50 * Math.random())];
+  this.time = 60 * Math.random();
+  this.previousTime = null;
+  this.particleSystemCenterPosition = new Float32Array(3);
+  this.cameraPosition = createVec3(0, 0, 0);
+  this.timeSamples = new Float32Array(80);
+  this.timeSamplesCount = 0;
+  this.particleScaleFactor = .5;
+  this.isParticleScaleDecreasing = !1;
+  this.scaleIncreaseCount = this.scaleDecreaseCount = 0;
+  const someTexture = new ParticleTexture(this.glContext, 512, 1024);
+  this.particleSystems = [new ParticleSystem(this.glContext, someTexture, 0, 20, random100), new ParticleSystem(this.glContext, someTexture, 20, 200, random100 + 50 + 50 * Math.random())];
   this.glContext.colorMask(!0, !0, !0, !0);
   this.glContext.depthMask(!1);
   this.glContext.disable(2929); // DEPTH_TEST
   this.glContext.disable(2884); // CULL_FACE
   this.glContext.disable(3042); // BLEND
-  this.glContext.activateProgram(this.fyProgram);
+  this.glContext.activateProgram(this.renderParticleSystemProgram);
   this.glContext.bindAttributeBuffer("uv", this.buffer);
-  for (canvas = 0; canvas < this.Si.length; ++canvas)
-    this.glContext.bindFramebuffer(this.Si[canvas].Tt),
+  for (i = 0; i < this.particleSystems.length; ++i)
+    this.glContext.bindFramebuffer(this.particleSystems[i].Tt),
       this.glContext.drawArrays(4, 0, this.buffer.vertexCount),
-      this.glContext.bindFramebuffer(this.Si[canvas].gV),
+      this.glContext.bindFramebuffer(this.particleSystems[i].gV),
       this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
-  this.Wab()
+  this.updateCenterPoint()
 };
 u(Particles, Updatable); // inherit from UX. UX.prototype.update = function() {};
 var kka = {
@@ -1281,7 +1281,7 @@ Particles.prototype.createNoiseTex = function (a) {
   })
 }
 ;
-var xY = function (a, b, c) {
+var getTargetPosition = function (a, b, c) {
   var e = 2 * (Math.cos(.51 * a) + Math.sin(.29 * a))
     , f = 3 * Math.cos(a + Math.sin(.47 * a)) - 2 * Math.sin(.79 * a);
   a = .5 + .5 * (Math.sin(a + Math.cos(.31 * a)) * Math.cos(3.7 * a) - Math.sin(2.1 * a));
@@ -1289,7 +1289,7 @@ var xY = function (a, b, c) {
   return createVec3(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
 };
 // d = wY.prototype;
-Particles.prototype.Nma = function (a, b) {
+Particles.prototype.colorFromHue = function (a, b) {
   a %= 6;
   a = createVec3(Math.max(0, Math.min(1, Math.abs(a - 3) - 1)), Math.max(0, Math.min(1, 2 - Math.abs(a - 2))), Math.max(0, Math.min(1, 2 - Math.abs(a - 4))));
   a[0] = 1 - b + b * a[0];
@@ -1300,73 +1300,73 @@ Particles.prototype.Nma = function (a, b) {
 ;
 Particles.prototype.update = function (a) {
   var b = 2 / 60;
-  this.UY && (b = (a - this.UY) / 1E3,
+  this.previousTime && (b = (a - this.previousTime) / 1E3,
     b = Math.min(.2, b));
-  this.UY = a;
-  a = this.sBb(b);
-  this.audioInfo.UAb(this.analyserNode);
-  this.jB += a;
-  this.lBb(a);
-  this.HAb();
-  this.tc(a)
+  this.previousTime = a;
+  a = this.updateTimeBasedState(b);
+  this.audioInfo.updateAudioData(this.analyserNode);
+  this.time += a;
+  this.renderForeground(a);
+  this.updateCameraPosition();
+  this.renderBackground(a)
 }
 ;
-Particles.prototype.sBb = function (a) {
-  for (var b = this.dI.length - 1; 0 < b; --b)
-    this.dI[b] = this.dI[b - 1];
-  this.dI[0] = 1E3 * a;
-  this.xQ = Math.min(30, this.xQ + 1);
-  for (b = a = 0; b < this.xQ; ++b)
-    a += this.dI[b];
-  a /= this.xQ;
-  36 < a ? (++this.tU,
-    this.sU = 0) : (++this.sU,
-    this.tU = 0);
-  30 < this.tU && (this.iBa = !0,
-    this.tU = 0,
-    this.eA = Math.max(.1, this.eA - Math.min(.1, (a - 36) / 200)));
-  !this.iBa && 30 < this.sU && (this.sU = 0,
-    this.eA = Math.min(1, this.eA + .01));
+Particles.prototype.updateTimeBasedState = function (a) {
+  for (var b = this.timeSamples.length - 1; 0 < b; --b)
+    this.timeSamples[b] = this.timeSamples[b - 1];
+  this.timeSamples[0] = 1E3 * a;
+  this.timeSamplesCount = Math.min(30, this.timeSamplesCount + 1);
+  for (b = a = 0; b < this.timeSamplesCount; ++b)
+    a += this.timeSamples[b];
+  a /= this.timeSamplesCount;
+  36 < a ? (++this.scaleDecreaseCount,
+    this.scaleIncreaseCount = 0) : (++this.scaleIncreaseCount,
+    this.scaleDecreaseCount = 0);
+  30 < this.scaleDecreaseCount && (this.isParticleScaleDecreasing = !0,
+    this.scaleDecreaseCount = 0,
+    this.particleScaleFactor = Math.max(.1, this.particleScaleFactor - Math.min(.1, (a - 36) / 200)));
+  !this.isParticleScaleDecreasing && 30 < this.scaleIncreaseCount && (this.scaleIncreaseCount = 0,
+    this.particleScaleFactor = Math.min(1, this.particleScaleFactor + .01));
   return a / 1E3
 }
 ;
-Particles.prototype.lBb = function (a) {
-  for (var b = 0; b < this.Si.length; ++b)
-    this.Si[b].update(a, this.audioInfo.bL);
+Particles.prototype.renderForeground = function (a) {
+  for (var b = 0; b < this.particleSystems.length; ++b)
+    this.particleSystems[b].update(a, this.audioInfo.bL);
   this.glContext.colorMask(!0, !0, !0, !0);
   this.glContext.depthMask(!1);
   this.glContext.disable(2929);
   this.glContext.disable(2884);
   this.glContext.disable(3042);
-  this.glContext.activateProgram(this.iyProgram);
-  this.glContext.bindTexture("noiseTex", this.noiseText);
-  this.glContext.setUniform("time", this.jB, a);
-  this.glContext.setUniform("drift", 60 * Math.sin(this.jB) * a, 150 * a, 120 * a);
+  this.glContext.activateProgram(this.particleSimulationProgram);
+  this.glContext.bindTexture("noiseTex", this.noiseTexture);
+  this.glContext.setUniform("time", this.time, a);
+  this.glContext.setUniform("drift", 60 * Math.sin(this.time) * a, 150 * a, 120 * a);
   this.glContext.setUniform("randomTexOffset", Math.random(), Math.random());
-  for (b = 0; b < this.Si.length; ++b) {
-    var c = this.Si[b]
-      , e = c.czb()
+  for (b = 0; b < this.particleSystems.length; ++b) {
+    var c = this.particleSystems[b]
+      , e = c.getOpacity()
       , f = 3 * e
       , h = 12 * f * f * f
       , k = c.gV;
     c.gV = c.Tt;
     c.Tt = k;
-    k = Math.floor(this.eA * c.Tt.height) / c.Tt.height;
+    k = Math.floor(this.particleScaleFactor * c.Tt.height) / c.Tt.height;
     this.glContext.bindFramebuffer(c.Tt);
     this.glContext.bindTexture("randomTex", c.texture);
     this.glContext.bindTexture("positionTex", c.gV.colorTexture);
     this.glContext.bindAttributeBuffer("uv", this.buffer);
     this.glContext.setUniform("emitterSize", .01 + f, h, a * e * 30);
-    this.glContext.setUniform("pos0", this.Si[b].position);
-    this.glContext.setUniform("vel0", this.Si[b].gha);
-    this.glContext.setUniform("pos1", this.Si[1 - b].position);
-    this.glContext.setUniform("vel1", this.Si[1 - b].gha);
+    this.glContext.setUniform("pos0", this.particleSystems[b].position);
+    this.glContext.setUniform("vel0", this.particleSystems[b].gha);
+    this.glContext.setUniform("pos1", this.particleSystems[1 - b].position);
+    this.glContext.setUniform("vel1", this.particleSystems[1 - b].gha);
     this.glContext.setUniform("quality", k);
     this.glContext.drawArrays(4, 0, this.buffer.vertexCount) // drawArrays
   }
 }
 ;
-Particles.prototype.Tlb = function () {
+Particles.prototype.setupMatrices = function () {
   var a = new Float32Array(16)
     , b = new Float32Array(16)
     , c = new Float32Array(16);
@@ -1390,25 +1390,25 @@ Particles.prototype.Tlb = function () {
     b[13] = 0,
     b[14] = -20 / 999.99,
     b[15] = 0);
-  h = this.pna;
+  h = this.cameraPosition;
   e = sY[0];
-  vec3Sub(this.Jt, h, e);
-  vec3Div(e, e);
+  vec3Sub(this.particleSystemCenterPosition, h, e);
+  normalizeVector(e, e);
   e[3] = 0;
   f = sY[1];
   crossProduct(e, [0, 1, 0], f);
-  vec3Div(f, f);
+  normalizeVector(f, f);
   f[3] = 0;
   var k = sY[2];
   crossProduct(f, e, k);
-  vec3Div(k, k);
+  normalizeVector(k, k);
   k[3] = 0;
   e[0] = -e[0];
   e[1] = -e[1];
   e[2] = -e[2];
-  rY(a, 0, f);
-  rY(a, 1, k);
-  rY(a, 2, e);
+  setMatrix4Column(a, 0, f);
+  setMatrix4Column(a, 1, k);
+  setMatrix4Column(a, 2, e);
   a[3] = 0;
   a[7] = 0;
   a[11] = 0;
@@ -1471,22 +1471,22 @@ Particles.prototype.Tlb = function () {
   c[13] = f * wg + p * ud + G * Gf + ba * a;
   c[14] = h * wg + r * ud + J * Gf + la * a;
   c[15] = k * wg + A * ud + N * Gf + b * a;
-  this.glContext.bindFramebuffer(this.ZT);
+  this.glContext.bindFramebuffer(this.particleRenderFramebuffer);
   this.glContext.clearColor(0, 0, 0, 0);
   this.glContext.clear(16384);
   this.glContext.enable(3042);
   this.glContext.blendEquation(32774);
   this.glContext.blendFunc(1, 1);
-  this.glContext.activateProgram(this.hyProgram);
+  this.glContext.activateProgram(this.alphaMaskProgram);
   this.glContext.setUniform("worldViewProj", c);
-  c = this.canvas.height / 450 / (256 * this.eA);
+  c = this.canvas.height / 450 / (256 * this.particleScaleFactor);
   c = Math.max(c, 2 / 255);
   this.glContext.setUniform("density", c);
   for (c = 0; 2 > c; ++c)
-    a = this.Si[c],
+    a = this.particleSystems[c],
       this.glContext.bindTexture("positionTex", a.Tt.colorTexture),
       this.glContext.bindAttributeBuffer("uv", a.buffer),
-      a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
+      a = Math.floor(this.particleScaleFactor * a.Tt.height) * a.Tt.width,
       e = Math.floor(a / 2),
       0 == c ? (this.glContext.colorMask(!0, !1, !1, !1),
         this.glContext.drawArrays(0, 0, e),
@@ -1496,71 +1496,71 @@ Particles.prototype.Tlb = function () {
       this.glContext.drawArrays(0, e, a - e);
   this.glContext.colorMask(!0, !0, !0, !0);
   this.glContext.disable(3042);
-  this.glContext.bindFramebuffer(this.Lja);
-  this.glContext.activateProgram(this.eyProgram);
-  this.glContext.bindTexture("tex", this.ZT.colorTexture);
+  this.glContext.bindFramebuffer(this.colorBlendFramebuffer);
+  this.glContext.activateProgram(this.colorBlendProgram);
+  this.glContext.bindTexture("tex", this.particleRenderFramebuffer.colorTexture);
   this.glContext.bindAttributeBuffer("uv", this.buffer);
-  this.glContext.setUniform("color0", this.Nma(.05 * this.jB, .85));
-  this.glContext.setUniform("color1", this.Nma(.05 * this.jB + 2, .85));
+  this.glContext.setUniform("color0", this.colorFromHue(.05 * this.time, .85));
+  this.glContext.setUniform("color1", this.colorFromHue(.05 * this.time + 2, .85));
   this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
 }
 ;
 // init component
-Particles.prototype.tc = function () {
-  this.Tlb();
+Particles.prototype.renderBackground = function () {
+  this.setupMatrices();
   this.glContext.disable(3042); // GL_BLEND
-  this.glContext.bindFramebuffer(this.ZT);
-  this.glContext.activateProgram(this.dyProgram);
-  this.glContext.bindTexture("mainTex", this.Lja.colorTexture);
+  this.glContext.bindFramebuffer(this.particleRenderFramebuffer);
+  this.glContext.activateProgram(this.particleUpdateProgram);
+  this.glContext.bindTexture("mainTex", this.colorBlendFramebuffer.colorTexture);
   this.glContext.bindAttributeBuffer("uv", this.buffer);
   this.glContext.setUniform("duv", 1 / this.width, 0);
   this.glContext.setUniform("alphaScaleOffset", 1, 0);
   this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
   this.glContext.enable(3042);
   this.glContext.blendFunc(770, 771);
-  this.glContext.bindFramebuffer(this.dia);
-  this.glContext.bindTexture("mainTex", this.ZT.colorTexture);
+  this.glContext.bindFramebuffer(this.alphaBlendFramebuffer);
+  this.glContext.bindTexture("mainTex", this.particleRenderFramebuffer.colorTexture);
   this.glContext.bindAttributeBuffer("uv", this.buffer);
   this.glContext.setUniform("duv", 0, 1 / this.height);
   this.glContext.setUniform("alphaScaleOffset", .25, .75);
   this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
   this.glContext.disable(3042);
   this.glContext.bindFramebuffer(null);
-  this.glContext.activateProgram(this.gyProgram);
-  this.glContext.bindTexture("mainTex", this.dia.colorTexture);
+  this.glContext.activateProgram(this.finalRenderProgram);
+  this.glContext.bindTexture("mainTex", this.alphaBlendFramebuffer.colorTexture);
   this.glContext.bindTexture("grainTex", this.grainTex);
   this.glContext.bindAttributeBuffer("uv", this.buffer);
   this.glContext.setUniform("grainScaleOffset", this.canvas.width / this.grainTex.width, this.canvas.height / this.grainTex.height, Math.random(), Math.random());
   this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
 }
 ;
-Particles.prototype.Wab = function () {
-  this.Jt = new Float32Array(3);
-  vec3Add(this.Si[0].position, this.Si[1].position, this.Jt);
-  vec3Mul(this.Jt, .5, this.Jt)
+Particles.prototype.updateCenterPoint = function () {
+  this.particleSystemCenterPosition = new Float32Array(3);
+  vec3Add(this.particleSystems[0].position, this.particleSystems[1].position, this.particleSystemCenterPosition);
+  vec3Mul(this.particleSystemCenterPosition, .5, this.particleSystemCenterPosition)
 }
 ;
-Particles.prototype.HAb = function () {
-  var a = this.Si[0].position
-    , b = this.Si[1].position
-    , c = .3 * this.jB;
-  this.pna = createVec3(4.4 * Math.cos(c), 0, 4.4 * Math.sin(c));
+Particles.prototype.updateCameraPosition = function () {
+  var a = this.particleSystems[0].position
+    , b = this.particleSystems[1].position
+    , c = .3 * this.time;
+  this.cameraPosition = createVec3(4.4 * Math.cos(c), 0, 4.4 * Math.sin(c));
   c = new Float32Array(3);
   vec3Add(a, b, c);
   vec3Mul(c, .5, c);
   vec3Mul(c, .05, c);
-  vec3Mul(this.Jt, .95, this.Jt);
-  vec3Add(this.Jt, c, this.Jt)
+  vec3Mul(this.particleSystemCenterPosition, .95, this.particleSystemCenterPosition);
+  vec3Add(this.particleSystemCenterPosition, c, this.particleSystemCenterPosition)
 }
 ;
-var uY = function (a, b, c) {
+var ParticleTexture = function (a, b, c) {
   this.width = b;
   this.height = c;
   this.size = b * c;
   this.texture = this.createRandomTexture(a);
   this.buffer = this.createGradientBuffer(a)
 };
-uY.prototype.createRandomTexture = function (a) {
+ParticleTexture.prototype.createRandomTexture = function (a) {
   for (var b = this.width, c = this.height, vector4List = new Float32Array(b * c * 4), f = Math.floor(vector4List.length / 8), h = 0; h < f;) {
     var k, m, p;
     do
@@ -1591,7 +1591,7 @@ uY.prototype.createRandomTexture = function (a) {
   })
 }
 ;
-uY.prototype.createGradientBuffer = function (a) {
+ParticleTexture.prototype.createGradientBuffer = function (a) {
   for (var b = new Float32Array(2 * this.size), c = 0, e = 0; e < this.height; ++e)
     for (var f = 0; f < this.width; ++f) {
       var h = f / this.width
@@ -1610,7 +1610,7 @@ uY.prototype.createGradientBuffer = function (a) {
  * @param e
  * @param f
  */
-var vY = function (gl, b, c, e, f) {
+var ParticleSystem = function (gl, b, c, e, f) {
   this.doa = c;
   this.tfa = this.RV = 0;
   this.MX = f;
@@ -1626,28 +1626,28 @@ var vY = function (gl, b, c, e, f) {
   this.Tt = gl.createFramebuffer(b.width, b.height, c, !1);
   this.gV = gl.createFramebuffer(b.width, b.height, c, !1);
   this.buffer = b.buffer;
-  this.sMa(0)
+  this.updatePosition(0)
 };
-vY.prototype.update = function (a, b) {
-  this.xBb(b);
-  this.sMa(a)
+ParticleSystem.prototype.update = function (a, b) {
+  this.updateTextureData(b);
+  this.updatePosition(a)
 }
 ;
-vY.prototype.sMa = function (a) {
+ParticleSystem.prototype.updatePosition = function (a) {
   var b = this.position
-    , c = xY(this.MX + .01, 1.5, 3)
+    , c = getTargetPosition(this.MX + .01, 1.5, 3)
     , e = b[0] - c[0]
     , f = b[1] - c[1]
     , b = b[2] - c[2]
     , e = .01 / (.001 + Math.sqrt(e * e + f * f + b * b))
     , e = .3 * Math.log(1 + 5 * e);
   this.MX += this.tfa * a * e;
-  a = xY(this.MX, 1.5, 3);
+  a = getTargetPosition(this.MX, 1.5, 3);
   vec3Sub(a, this.position, this.gha);
   this.position = a
 }
 ;
-vY.prototype.xBb = function (a) {
+ParticleSystem.prototype.updateTextureData = function (a) {
   for (var b = this.TE[0].length, c = 0, e = 0; e < b; ++e)
        var f = a[e + this.doa] - Math.min(this.TE[0][e], this.TE[1][e])
          , f = 4 * f
@@ -1660,7 +1660,7 @@ vY.prototype.xBb = function (a) {
       this.TE[0][e] = a[e + this.doa]
 }
 ;
-vY.prototype.czb = function () {
+ParticleSystem.prototype.getOpacity = function () {
   return .05 * this.RV
 }
 ;
