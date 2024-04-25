@@ -1,0 +1,35 @@
+precision mediump float;
+varying vec2 varyingTexCoord;
+attribute vec2 uv;
+export void vertex()
+{
+    varyingTexCoord = uv;
+    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
+}
+
+precision mediump float;
+uniform sampler2D mainTex;
+uniform vec2 duv, alphaScaleOffset;
+export void fragment()
+{
+    vec4 centerColor, leftColor, rightColor, left2Color, right2Color, left3Color, right3Color;
+    vec4 zeroVector, oneVector, weightLeft, weightRight, weightLeft2, weightRight2, weightLeft3, weightRight3;
+    centerColor = texture2D(mainTex, varyingTexCoord);
+    leftColor = texture2D(mainTex, varyingTexCoord - duv);
+    rightColor = texture2D(mainTex, varyingTexCoord + duv);
+    left2Color = texture2D(mainTex, varyingTexCoord - 2. * duv);
+    right2Color = texture2D(mainTex, varyingTexCoord + 2. * duv);
+    left3Color = texture2D(mainTex, varyingTexCoord - 3. * duv);
+    right3Color = texture2D(mainTex, varyingTexCoord + 3. * duv);
+    zeroVector = vec4(0);
+    oneVector = vec4(1);
+    weightLeft = .8521 * max(zeroVector, oneVector - .7 * abs(leftColor - centerColor));
+    weightRight = .8521 * max(zeroVector, oneVector - .7 * abs(rightColor - centerColor));
+    weightLeft2 = .5273 * max(zeroVector, oneVector - 2. * abs(left2Color - centerColor));
+    weightRight2 = .5273 * max(zeroVector, oneVector - 2. * abs(right2Color - centerColor));
+    weightLeft3 = .2369 * max(zeroVector, oneVector - 2. * abs(left3Color - centerColor));
+    weightRight3 = .2369 * max(zeroVector, oneVector - 2. * abs(right3Color - centerColor));
+    centerColor += weightLeft * leftColor + weightRight * rightColor + weightLeft2 * left2Color + weightRight2 * right2Color + weightLeft3 * left3Color + weightRight3 * right3Color;
+    gl_FragColor = centerColor / (weightLeft + weightRight + weightLeft2 + weightRight2 + weightLeft3 + weightRight3 + 1.);
+    gl_FragColor.a = alphaScaleOffset.x * gl_FragColor.a + alphaScaleOffset.y;
+}

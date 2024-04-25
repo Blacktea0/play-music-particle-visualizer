@@ -1,0 +1,23 @@
+precision mediump float;
+varying vec2 varyingTexCoord;
+attribute vec2 uv;
+export void vertex()
+{
+    varyingTexCoord = uv;
+    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
+}
+
+precision mediump float;
+uniform sampler2D tex;
+uniform vec3 color0, color1;
+export void fragment()
+{
+    vec4 sampledColor, outputColor;
+    sampledColor = texture2D(tex, varyingTexCoord);
+    float sumRG, sumBA;
+    sumRG = .5 * (sampledColor.x + sampledColor.y);
+    sumBA = .5 * (sampledColor.z + sampledColor.w);
+    outputColor = vec4(color0 * sumRG + color1 * sumBA, sumRG + sumBA);
+    gl_FragColor = 2. * sqrt(outputColor);
+    gl_FragColor.xyz = vec3(1) - gl_FragColor.xyz;
+}

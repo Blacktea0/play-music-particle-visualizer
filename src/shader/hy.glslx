@@ -1,0 +1,19 @@
+precision mediump float;
+attribute vec2 uv;
+uniform sampler2D positionTex;
+uniform mat4 worldViewProj;
+export void vertex()
+{
+    vec4 positionData = texture2D(positionTex, uv);
+    gl_Position = worldViewProj * vec4(positionData.xyz, 1);
+    gl_PointSize = 1. + min(1. / gl_Position.w, 64.);
+}
+
+precision mediump float;
+uniform float density;
+export void fragment()
+{
+    vec2 pointCoordCentered = 2. * (gl_PointCoord - vec2(.5));
+    float pointAlpha = 1. - smoothstep(0., 1., dot(pointCoordCentered, pointCoordCentered));
+    gl_FragColor = vec4(density * pointAlpha);
+}

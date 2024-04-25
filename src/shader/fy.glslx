@@ -1,0 +1,13 @@
+precision mediump float;
+varying vec2 varyingTexCoord;
+attribute vec2 uv;
+export void vertex()
+{
+    varyingTexCoord = uv;
+    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
+}
+
+precision mediump float;
+export void fragment() {
+    gl_FragColor = vec4(0, -10000, 0, 0);
+}

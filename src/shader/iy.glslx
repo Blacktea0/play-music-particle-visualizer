@@ -1,0 +1,79 @@
+precision mediump float;
+varying vec2 varyingUV;
+attribute vec2 uv;
+uniform float quality;
+export void vertex()
+{
+    varyingUV = uv * vec2(1, quality);
+    gl_Position = vec4(varyingUV * 2. - vec2(1), 1, 1);
+}
+
+precision mediump float;
+uniform sampler2D positionTex, randomTex, noiseTex;
+uniform vec2 time, randomTexOffset;
+uniform vec3 pos0, vel0, pos1, vel1, drift, emitterSize;
+const float noiseSize = 32.;
+const float noiseScalar = .5 / (noiseSize * (noiseSize - 1.));
+const float noiseSizeOverNoiseSizeMinusOne = noiseSize / (noiseSize - 1.);
+const float noiseSizeMinusOneOverNoiseSizeSquared = (noiseSize - 1.) / (noiseSize * noiseSize);
+const float noiseSizeFloat = noiseSize;
+const float oneOverNoiseSize = 1. / noiseSize;
+vec3 getNoiseValue(vec3 position)
+{
+    float noiseTexCoordY = noiseScalar + floor(position.z) * oneOverNoiseSize;
+    return texture2D(noiseTex, vec2(position.x, noiseTexCoordY + fract(position.y * noiseSizeOverNoiseSizeMinusOne) * noiseSizeMinusOneOverNoiseSizeSquared)).xyz;
+}
+vec3 getSummedNoise(vec3 position)
+{
+    position.z *= noiseSize;
+    vec3 noiseValue1, noiseValue2, noiseValue3, noiseValueMix1, noiseValueMix2, summedNoise;
+    noiseValue1 = position * .03 - time.x * vec3(.03, .05, .07);
+    noiseValue2 = getNoiseValue(noiseValue1);
+    noiseValue3 = getNoiseValue(noiseValue1 + vec3(0, 0, 1));
+    noiseValueMix1 = 2. * mix(noiseValue2, noiseValue3, fract(noiseValue1.z)) - vec3(1);
+    noiseValue1 = position * .15 + time.x * vec3(.01, .02, .03);
+    noiseValue2 = getNoiseValue(noiseValue1);
+    noiseValue3 = getNoiseValue(noiseValue1 + vec3(0, 0, 1));
+    noiseValueMix2 = 2. * mix(noiseValue2, noiseValue3, fract(noiseValue1.z)) - vec3(1);
+    summedNoise = 8. * noiseValueMix1 + 5. * noiseValueMix2 + drift;
+    return summedNoise;
+}
+vec3 getVelocityBased(vec4 particleData, vec3 position, vec3 velocity)
+{
+    vec3 particlePosition, velocityBased;
+    particlePosition = particleData.xyz - position;
+    float distanceSquared = dot(particlePosition, particlePosition);
+    velocityBased = particlePosition / (1. + distanceSquared * distanceSquared);
+    velocityBased *= 1.5 * max(0., dot(particlePosition, velocity));
+    return velocityBased;
+}
+vec3 getPositionBased(vec4 particleData, vec3 position, float strength)
+{
+    vec3 particlePosition, positionBased;
+    particlePosition = particleData.xyz - position;
+    positionBased = (1. - smoothstep(0., .5, particleData.w)) * normalize(particlePosition);
+    return positionBased * strength;
+}
+export void fragment()
+{
+    vec4 particleData, randomData;
+    particleData = texture2D(positionTex, varyingUV);
+    float randomValue, emitterWeight, emitterStrength, particleLifetime;
+    randomValue = texture2D(randomTex, varyingUV + randomTexOffset).w;
+    randomData = texture2D(randomTex, varyingUV);
+    vec3 startPosition0, startPosition1, velocityBased0, velocityBased1, positionBased, summedNoise;
+    startPosition0 = pos0 - randomData.w * vel0;
+    startPosition1 = pos1 - randomData.w * vel1;
+    emitterWeight = emitterSize.x;
+    emitterStrength = emitterSize.y;
+    particleLifetime = emitterSize.z;
+    if (randomValue < emitterStrength)
+    particleData = vec4(startPosition0 + emitterWeight * randomData.xyz, 0);
+    particleData.xyz += getVelocityBased(particleData, startPosition0, vel0) + getVelocityBased(particleData, startPosition1, vel1) + getPositionBased(particleData, startPosition0, particleLifetime);
+    summedNoise = getSummedNoise(particleData.xyz);
+    particleData.xyz += time.y * 30. * .002 * summedNoise;
+    particleData.w += time.y;
+    if (particleData.w > 2. + 4. * randomData.w)
+    particleData.y = -1e4;
+    gl_FragColor = particleData;
+}

@@ -3,9 +3,9 @@ export class Uniform {
   readonly location: WebGLUniformLocation
   readonly isMatrix: boolean
   readonly setter: ((location: WebGLUniformLocation, x: GLfloat) => void) |
-    ((location: WebGLUniformLocation, x: Float32List) => void) |
-    ((location: WebGLUniformLocation, v: Int32List) => void) |
-    ((location: WebGLUniformLocation, transpose: boolean, value: Float32List) => void)
+  ((location: WebGLUniformLocation, x: Float32List) => void) |
+  ((location: WebGLUniformLocation, v: Int32List) => void) |
+  ((location: WebGLUniformLocation, transpose: boolean, value: Float32List) => void)
 
   constructor (gl: WebGLRenderingContext, type: GLenum, location: WebGLUniformLocation) {
     this.type = type
@@ -118,7 +118,7 @@ export class ShaderProgram {
     }
   }
 
-  protected initVariableMapping (gl: WebGLRenderingContext, reverseRenaming: {[k in string]: string}) {
+  protected initVariableMapping (gl: WebGLRenderingContext, reverseRenaming: { [k in string]: string }): void {
     gl.useProgram(this.handle)
     const activeAttributes = gl.getProgramParameter(this.handle, WebGLRenderingContext.ACTIVE_ATTRIBUTES)
     for (let i = 0; i < activeAttributes; i++) {
@@ -138,7 +138,11 @@ export class ShaderProgram {
       gl.getUniformLocation(this.handle, uniform.name)
       const type = uniform.type
       const name = reverseRenaming[uniform.name]
-      let samplerCount = 0;
+      const location = gl.getUniformLocation(this.handle, uniform.name)
+      if (location == null) {
+        throw Error('Failed to get uniform location')
+      }
+      let samplerCount = 0
       if (type === WebGLRenderingContext.SAMPLER_2D || type === WebGLRenderingContext.SAMPLER_CUBE) {
         const sampler = new Sampler(gl, type, location, samplerCount++)
         gl.uniform1i(location, sampler.textureX)
@@ -209,9 +213,9 @@ export class TextureOptions {
   readonly wrap: GLenum | null = null
   readonly filter: GLenum | null = null
   readonly format: GLenum | null = null
-  readonly data: Uint8Array | null = null
+  readonly data: ArrayBufferView | null = null
 
-  constructor (data: Uint8Array) {
+  constructor (data: ArrayBufferView) {
     this.data = data
   }
 }
@@ -348,7 +352,10 @@ export class WebGLContext {
     }
   }
 
-  bindTexture (name: string, texture: Texture): void {
+  bindTexture (name: string, texture: Texture | null): void {
+    if (texture == null) {
+      throw Error('texture is null')
+    }
     const sampler = this.usingProgram?.getSampler(name)
     if (sampler != null) {
       this.gl.activeTexture(WebGLRenderingContext.TEXTURE0 + sampler.textureX)
@@ -405,7 +412,7 @@ export class WebGLContext {
     return program
   }
 
-  bindFramebuffer (framebuffer: Framebuffer): void {
+  bindFramebuffer (framebuffer: Framebuffer | null): void {
     if (framebuffer != null) {
       this.gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, framebuffer.handle)
       this.gl.viewport(0, 0, framebuffer.width, framebuffer.height)
@@ -471,16 +478,19 @@ export class WebGLContext {
     return this.gl.getSupportedExtensions()
   }
 
-  setUniform (name: string | number, ...values: number[]): void {
+  setUniform (name: string, ...values: any): void {
     const uniform = this.usingProgram?.uniformMapping[name]
     if (uniform == null) {
       throw new Error(`No uniform named "${name}"`)
+    }
+    if (values.length === 1) {
+      values = values[0]
     }
     const gl = this.gl
     if (uniform.isMatrix) {
       uniform.setter.call(gl, uniform.location, false, values)
     } else {
-      uniform.setter.call(gl, uniform.location, ...values)
+      uniform.setter.call(gl, uniform.location, values)
     }
   }
 }

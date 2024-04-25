@@ -1,34 +1,8 @@
-import { initBuffers } from './init-buffer'
-import { drawScene } from './draw-scene'
-import { type ProgramInfo } from './program-info'
-import { ShaderProgram } from './webgl-context'
-import { Cy } from './shader/cy'
-import * as shaders from './shader/demo.glslx'
+import { WebGLContext } from './webgl-context'
+import { Particles } from './particles'
+import { RandomDatasource } from '../test/test-utils'
 
 main()
-
-/*
-- get WebGL context
-- init shader program
-  - load vertex shader
-  - load fragment shader
-  - create program
-  - attach both shader
-  - link program
-- prepare program info
-- init buffers
-  - create buffer
-  - bind buffer
-  - buffer data
-- draw scene
-  - config scene
-  - bind buffer
-  - vertex attrib pointer
-  - enable vertex attrib array
-  - use program
-  - set shader uniform
-  - draw arrays
- */
 
 function main (): void {
   const canvas: HTMLCanvasElement | null = document.querySelector('#particles')
@@ -54,40 +28,14 @@ function main (): void {
       return
     }
   }
-  gl.clearColor(0.0, 0.0, 0.0, 1.0)
-  gl.clearDepth(1.0)
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-  gl.enable(gl.DEPTH_TEST)
-  gl.depthFunc(gl.LEQUAL)
 
-  const cy = new Cy(gl)
-  console.log(cy)
-
-  const shaderProgram = new ShaderProgram(gl, shaders.vertex, shaders.fragment)
-
-  console.log('wrong:')
-  console.log(gl.getAttribLocation(shaderProgram.handle, shaders.renaming.uModelViewMatrix))
-  console.log(gl.getUniformLocation(shaderProgram.handle, shaders.renaming.aVertexPosition))
-  console.log('right:')
-  console.log(gl.getAttribLocation(shaderProgram.handle, shaders.renaming.aVertexPosition))
-  console.log(gl.getUniformLocation(shaderProgram.handle, shaders.renaming.uModelViewMatrix))
-
-  const programInfo: ProgramInfo = {
-    program: shaderProgram.handle,
-    attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram.handle, shaders.renaming.aVertexPosition)
-    },
-    uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(shaderProgram.handle, shaders.renaming.uProjectionMatrix),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram.handle, shaders.renaming.uModelViewMatrix)
-    }
+  const analyserNode = new RandomDatasource()
+  const webGLContext = new WebGLContext(canvas, gl)
+  const particles = new Particles(analyserNode, gl, canvas, webGLContext)
+  particles.renderBackground()
+  function render (now: number): void {
+    particles.update(now)
+    requestAnimationFrame(render)
   }
-
-  console.log(programInfo)
-
-  const buffers = initBuffers(gl).position
-  if (buffers == null) {
-    throw Error('Failed to init buffer')
-  }
-  drawScene(gl, programInfo, buffers)
+  requestAnimationFrame(render)
 }

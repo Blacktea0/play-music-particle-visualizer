@@ -1,0 +1,23 @@
+precision mediump float;
+varying vec2 varyingTexCoord;
+attribute vec2 uv;
+export void vertex()
+{
+    varyingTexCoord = uv;
+    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
+}
+
+precision mediump float;
+uniform sampler2D grainTex, mainTex;
+uniform vec4 grainScaleOffset;
+export void fragment()
+{
+    vec2 scaledTexCoord = varyingTexCoord * 2. - vec2(1);
+    float radiusWeight, grainAlpha;
+    radiusWeight = smoothstep(.2, 5., dot(scaledTexCoord, scaledTexCoord));
+    grainAlpha = texture2D(grainTex, varyingTexCoord * grainScaleOffset.xy + grainScaleOffset.zw).w;
+    vec3 mainColor = texture2D(mainTex, varyingTexCoord).xyz;
+    mainColor *= 1. - radiusWeight;
+    gl_FragColor.xyz = abs(mainColor - .05 * grainAlpha);
+    gl_FragColor.w = 1.;
+}
