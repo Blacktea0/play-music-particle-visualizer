@@ -1,5 +1,5 @@
 import url from '../assets/flow.mp3'
-import { Sampler, Uniform } from './webgl-context'
+import { Sampler, Uniform, WebGLContext } from './webgl-context'
 import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
 
 var d
@@ -370,8 +370,8 @@ MX.prototype.Oa = function () {
   this.PO = []
   for (a = 0; a < this.yQ.length; ++a) {
     var b = this.yQ[a]
-    b.jq && this.Sc.deleteTexture(b.jq.handle)
-    b.MP && this.Sc.deleteTexture(b.MP.handle)
+    b.colorTexture && this.Sc.deleteTexture(b.colorTexture.handle)
+    b.depthTexture && this.Sc.deleteTexture(b.depthTexture.handle)
     this.Sc.deleteFramebuffer(b.handle)
   }
   this.yQ = []
@@ -415,15 +415,15 @@ MX.prototype.bindTexture = function (a, b) {
 }
 
 var $ja = function (a, b, c, e, f) {
-  this.MP = this.jq = null
+  this.depthTexture = this.colorTexture = null
   this.handle = a.createFramebuffer()
   this.width = b
   this.height = c
   a.bindFramebuffer(36160, this.handle)
-  e && (this.jq = new NX(a, b, c, e),
-    a.framebufferTexture2D(36160, 36064, 3553, this.jq.handle, 0))
-  f && (this.MP = new NX(a, b, c, f),
-    a.framebufferTexture2D(36160, 36096, 3553, this.MP.handle, 0))
+  e && (this.colorTexture = new NX(a, b, c, e),
+    a.framebufferTexture2D(36160, 36064, 3553, this.colorTexture.handle, 0))
+  f && (this.depthTexture = new NX(a, b, c, f),
+    a.framebufferTexture2D(36160, 36096, 3553, this.depthTexture.handle, 0))
   a.bindFramebuffer(36160, null)
 }
 d = MX.prototype
@@ -852,7 +852,7 @@ d.lBb = function (a) {
     k = Math.floor(this.eA * c.Tt.height) / c.Tt.height
     this.Ha.bindFramebuffer(c.Tt)
     this.Ha.bindTexture('randomTex', c.maa)
-    this.Ha.bindTexture('positionTex', c.gV.jq)
+    this.Ha.bindTexture('positionTex', c.gV.colorTexture)
     this.Ha.bindAttributeBuffer('uv', this.Ji)
     this.Ha.setUniform('emitterSize', .01 + f, h, a * e * 30)
     this.Ha.setUniform('pos0', this.Si[b].position)
@@ -982,7 +982,7 @@ d.Tlb = function () {
   this.Ha.setUniform('density', c)
   for (c = 0; 2 > c; ++c)
     a = this.Si[c],
-      this.Ha.bindTexture('positionTex', a.Tt.jq),
+      this.Ha.bindTexture('positionTex', a.Tt.colorTexture),
       this.Ha.bindAttributeBuffer('uv', a.hha),
       a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
       e = Math.floor(a / 2),
@@ -996,7 +996,7 @@ d.Tlb = function () {
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(this.Lja)
   this.Ha.activateProgram(this.KUa)
-  this.Ha.bindTexture('tex', this.ZT.jq)
+  this.Ha.bindTexture('tex', this.ZT.colorTexture)
   this.Ha.bindAttributeBuffer('uv', this.Ji)
   this.Ha.setUniform('color0', this.Nma(.05 * this.jB, .85))
   this.Ha.setUniform('color1', this.Nma(.05 * this.jB + 2, .85))
@@ -1008,7 +1008,7 @@ d.tc = function () {
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(this.ZT)
   this.Ha.activateProgram(this.ISa)
-  this.Ha.bindTexture('mainTex', this.Lja.jq)
+  this.Ha.bindTexture('mainTex', this.Lja.colorTexture)
   this.Ha.bindAttributeBuffer('uv', this.Ji)
   this.Ha.setUniform('duv', 1 / this.KL, 0)
   this.Ha.setUniform('alphaScaleOffset', 1, 0)
@@ -1016,7 +1016,7 @@ d.tc = function () {
   this.Ha.enable(3042)
   this.Ha.blendFunc(770, 771)
   this.Ha.bindFramebuffer(this.dia)
-  this.Ha.bindTexture('mainTex', this.ZT.jq)
+  this.Ha.bindTexture('mainTex', this.ZT.colorTexture)
   this.Ha.bindAttributeBuffer('uv', this.Ji)
   this.Ha.setUniform('duv', 0, 1 / this.JL)
   this.Ha.setUniform('alphaScaleOffset', .25, .75)
@@ -1024,7 +1024,7 @@ d.tc = function () {
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(null)
   this.Ha.activateProgram(this.Oib)
-  this.Ha.bindTexture('mainTex', this.dia.jq)
+  this.Ha.bindTexture('mainTex', this.dia.colorTexture)
   this.Ha.bindTexture('grainTex', this.m6)
   this.Ha.bindAttributeBuffer('uv', this.Ji)
   this.Ha.setUniform('grainScaleOffset', this.fq.width / this.m6.width, this.fq.height / this.m6.height, Math.random(), Math.random())
@@ -1184,6 +1184,7 @@ canvas.addEventListener('click', (e) => {
   audioElement.play()
 
   const mxContext = new MX(canvas, context)
+  const webGLContext = new WebGLContext(canvas, context)
   const particle = new wY(analyserNode, context, canvas, mxContext)
 
   function render (now) {
