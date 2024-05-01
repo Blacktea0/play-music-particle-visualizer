@@ -390,7 +390,7 @@ MX.prototype.Oa = function () {
   this.RX = []
 }
 
-MX.prototype.Lx = function (a) {
+MX.prototype.activateProgram = function (a) {
   if (this.Nx != a) {
     var b = this.Nx ? this.Nx.attribCount : 0
       , c = a.attribCount
@@ -447,17 +447,17 @@ d.createTexture = function (a, b, c) {
   return a
 }
 
-d.$u = function (a, b) {
+d.bindAttributeBuffer = function (a, b) {
   a = this.Nx.attributes[a]
   this.Sc.bindBuffer(34962, b.handle)
   this.Sc.vertexAttribPointer(a, b.a1, 5126, !1, 0, 0)
 }
 
-d.Wn = function (a, b, c) {
+d.drawArrays = function (a, b, c) {
   this.Sc.drawArrays(a, b, c)
 }
 
-d.e0 = function (a, b, c) {
+d.createBuffer = function (a, b, c) {
   a = new aka(this.Sc, a, b, c)
   this.PO.push(a)
   return a
@@ -561,7 +561,7 @@ d.getSupportedExtensions = function () {
   return this.Sc.getSupportedExtensions()
 }
 
-d.Dg = function (a, b) {
+d.setUniform = function (a, b) {
   var c = this.Nx.uniforms[a]
   if (!c)
     throw Error('No uniform named "' + a + '"')
@@ -695,7 +695,7 @@ var wY = function (a, b, c, e) {
   this.ZT = this.Ha.createFramebuffer(this.KL, this.JL, b, !1)
   this.Lja = this.Ha.createFramebuffer(this.KL, this.JL, b, !1)
   this.dia = this.Ha.createFramebuffer(this.KL, this.JL, b, !1)
-  this.Ji = this.Ha.e0(2, 35044, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]))
+  this.Ji = this.Ha.createBuffer(2, 35044, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]))
   this.jB = 60 * Math.random()
   this.UY = null
   this.Jt = new Float32Array(3)
@@ -712,13 +712,13 @@ var wY = function (a, b, c, e) {
   this.Ha.disable(2929)
   this.Ha.disable(2884)
   this.Ha.disable(3042)
-  this.Ha.Lx(this.Kab)
-  this.Ha.$u('uv', this.Ji)
+  this.Ha.activateProgram(this.Kab)
+  this.Ha.bindAttributeBuffer('uv', this.Ji)
   for (c = 0; c < this.Si.length; ++c)
     this.Ha.bindFramebuffer(this.Si[c].Tt),
-      this.Ha.Wn(4, 0, this.Ji.Qt),
+      this.Ha.drawArrays(4, 0, this.Ji.Qt),
       this.Ha.bindFramebuffer(this.Si[c].gV),
-      this.Ha.Wn(4, 0, this.Ji.Qt)
+      this.Ha.drawArrays(4, 0, this.Ji.Qt)
   this.Wab()
 }
 u(wY, UX)
@@ -836,11 +836,11 @@ d.lBb = function (a) {
   this.Ha.disable(2929)
   this.Ha.disable(2884)
   this.Ha.disable(3042)
-  this.Ha.Lx(this.rBb)
+  this.Ha.activateProgram(this.rBb)
   this.Ha.bindTexture('noiseTex', this.qCb)
-  this.Ha.Dg('time', this.jB, a)
-  this.Ha.Dg('drift', 60 * Math.sin(this.jB) * a, 150 * a, 120 * a)
-  this.Ha.Dg('randomTexOffset', Math.random(), Math.random())
+  this.Ha.setUniform('time', this.jB, a)
+  this.Ha.setUniform('drift', 60 * Math.sin(this.jB) * a, 150 * a, 120 * a)
+  this.Ha.setUniform('randomTexOffset', Math.random(), Math.random())
   for (b = 0; b < this.Si.length; ++b) {
     var c = this.Si[b]
       , e = c.czb()
@@ -853,14 +853,14 @@ d.lBb = function (a) {
     this.Ha.bindFramebuffer(c.Tt)
     this.Ha.bindTexture('randomTex', c.maa)
     this.Ha.bindTexture('positionTex', c.gV.jq)
-    this.Ha.$u('uv', this.Ji)
-    this.Ha.Dg('emitterSize', .01 + f, h, a * e * 30)
-    this.Ha.Dg('pos0', this.Si[b].position)
-    this.Ha.Dg('vel0', this.Si[b].gha)
-    this.Ha.Dg('pos1', this.Si[1 - b].position)
-    this.Ha.Dg('vel1', this.Si[1 - b].gha)
-    this.Ha.Dg('quality', k)
-    this.Ha.Wn(4, 0, this.Ji.Qt)
+    this.Ha.bindAttributeBuffer('uv', this.Ji)
+    this.Ha.setUniform('emitterSize', .01 + f, h, a * e * 30)
+    this.Ha.setUniform('pos0', this.Si[b].position)
+    this.Ha.setUniform('vel0', this.Si[b].gha)
+    this.Ha.setUniform('pos1', this.Si[1 - b].position)
+    this.Ha.setUniform('vel1', this.Si[1 - b].gha)
+    this.Ha.setUniform('quality', k)
+    this.Ha.drawArrays(4, 0, this.Ji.Qt)
   }
 }
 
@@ -975,60 +975,60 @@ d.Tlb = function () {
   this.Ha.enable(3042)
   this.Ha.blendEquation(32774)
   this.Ha.blendFunc(1, 1)
-  this.Ha.Lx(this.Ulb)
-  this.Ha.Dg('worldViewProj', c)
+  this.Ha.activateProgram(this.Ulb)
+  this.Ha.setUniform('worldViewProj', c)
   c = this.fq.height / 450 / (256 * this.eA)
   c = Math.max(c, 2 / 255)
-  this.Ha.Dg('density', c)
+  this.Ha.setUniform('density', c)
   for (c = 0; 2 > c; ++c)
     a = this.Si[c],
       this.Ha.bindTexture('positionTex', a.Tt.jq),
-      this.Ha.$u('uv', a.hha),
+      this.Ha.bindAttributeBuffer('uv', a.hha),
       a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
       e = Math.floor(a / 2),
       0 == c ? (this.Ha.colorMask(!0, !1, !1, !1),
-        this.Ha.Wn(0, 0, e),
+        this.Ha.drawArrays(0, 0, e),
         this.Ha.colorMask(!1, !0, !1, !1)) : (this.Ha.colorMask(!1, !1, !0, !1),
-        this.Ha.Wn(0, 0, e),
+        this.Ha.drawArrays(0, 0, e),
         this.Ha.colorMask(!1, !1, !1, !0)),
-      this.Ha.Wn(0, e, a - e)
+      this.Ha.drawArrays(0, e, a - e)
   this.Ha.colorMask(!0, !0, !0, !0)
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(this.Lja)
-  this.Ha.Lx(this.KUa)
+  this.Ha.activateProgram(this.KUa)
   this.Ha.bindTexture('tex', this.ZT.jq)
-  this.Ha.$u('uv', this.Ji)
-  this.Ha.Dg('color0', this.Nma(.05 * this.jB, .85))
-  this.Ha.Dg('color1', this.Nma(.05 * this.jB + 2, .85))
-  this.Ha.Wn(4, 0, this.Ji.Qt)
+  this.Ha.bindAttributeBuffer('uv', this.Ji)
+  this.Ha.setUniform('color0', this.Nma(.05 * this.jB, .85))
+  this.Ha.setUniform('color1', this.Nma(.05 * this.jB + 2, .85))
+  this.Ha.drawArrays(4, 0, this.Ji.Qt)
 }
 
 d.tc = function () {
   this.Tlb()
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(this.ZT)
-  this.Ha.Lx(this.ISa)
+  this.Ha.activateProgram(this.ISa)
   this.Ha.bindTexture('mainTex', this.Lja.jq)
-  this.Ha.$u('uv', this.Ji)
-  this.Ha.Dg('duv', 1 / this.KL, 0)
-  this.Ha.Dg('alphaScaleOffset', 1, 0)
-  this.Ha.Wn(4, 0, this.Ji.Qt)
+  this.Ha.bindAttributeBuffer('uv', this.Ji)
+  this.Ha.setUniform('duv', 1 / this.KL, 0)
+  this.Ha.setUniform('alphaScaleOffset', 1, 0)
+  this.Ha.drawArrays(4, 0, this.Ji.Qt)
   this.Ha.enable(3042)
   this.Ha.blendFunc(770, 771)
   this.Ha.bindFramebuffer(this.dia)
   this.Ha.bindTexture('mainTex', this.ZT.jq)
-  this.Ha.$u('uv', this.Ji)
-  this.Ha.Dg('duv', 0, 1 / this.JL)
-  this.Ha.Dg('alphaScaleOffset', .25, .75)
-  this.Ha.Wn(4, 0, this.Ji.Qt)
+  this.Ha.bindAttributeBuffer('uv', this.Ji)
+  this.Ha.setUniform('duv', 0, 1 / this.JL)
+  this.Ha.setUniform('alphaScaleOffset', .25, .75)
+  this.Ha.drawArrays(4, 0, this.Ji.Qt)
   this.Ha.disable(3042)
   this.Ha.bindFramebuffer(null)
-  this.Ha.Lx(this.Oib)
+  this.Ha.activateProgram(this.Oib)
   this.Ha.bindTexture('mainTex', this.dia.jq)
   this.Ha.bindTexture('grainTex', this.m6)
-  this.Ha.$u('uv', this.Ji)
-  this.Ha.Dg('grainScaleOffset', this.fq.width / this.m6.width, this.fq.height / this.m6.height, Math.random(), Math.random())
-  this.Ha.Wn(4, 0, this.Ji.Qt)
+  this.Ha.bindAttributeBuffer('uv', this.Ji)
+  this.Ha.setUniform('grainScaleOffset', this.fq.width / this.m6.width, this.fq.height / this.m6.height, Math.random(), Math.random())
+  this.Ha.drawArrays(4, 0, this.Ji.Qt)
 }
 
 d.Wab = function () {
@@ -1096,7 +1096,7 @@ uY.prototype.tVa = function (a) {
       b[c++] = h
       b[c++] = k
     }
-  return a.e0(2, 35044, b)
+  return a.createBuffer(2, 35044, b)
 }
 
 var vY = function (a, b, c, e, f) {
