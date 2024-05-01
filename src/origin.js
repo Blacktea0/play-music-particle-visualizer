@@ -407,7 +407,7 @@ MX.prototype.Lx = function (a) {
 MX.prototype.bindTexture = function (a, b) {
   var c = this.Nx.E3a(a)
   if (void 0 != c)
-    this.Sc.activeTexture(33984 + c.Fu),
+    this.Sc.activeTexture(33984 + c.textureX),
       this.Sc.bindTexture(3553, b.handle)
   else
     throw Error('Texture ' + a + ' not found')
@@ -540,52 +540,52 @@ OX.prototype.E3a = function (a) {
 
 var PX = function (a, b, c) {
   this.type = b
-  this.UAa = c
-  this.iT = !1
+  this.location = c
+  this.isMatrix = !1
   switch (b) {
     case 5126:
-      this.um = a.uniform1f
+      this.setter = a.uniform1f
       break
     case 35664:
-      this.um = a.uniform2fv
+      this.setter = a.uniform2fv
       break
     case 35665:
-      this.um = a.uniform3fv
+      this.setter = a.uniform3fv
       break
     case 35666:
-      this.um = a.uniform4fv
+      this.setter = a.uniform4fv
       break
     case 35670:
     case 5124:
-      this.um = a.uniform1i
+      this.setter = a.uniform1i
       break
     case 35671:
     case 35667:
-      this.um = a.uniform2iv
+      this.setter = a.uniform2iv
       break
     case 35672:
     case 35668:
-      this.um = a.uniform3iv
+      this.setter = a.uniform3iv
       break
     case 35673:
     case 35669:
-      this.um = a.uniform4iv
+      this.setter = a.uniform4iv
       break
     case 35674:
-      this.um = a.uniformMatrix2fv
-      this.iT = !0
+      this.setter = a.uniformMatrix2fv
+      this.isMatrix = !0
       break
     case 35675:
-      this.um = a.uniformMatrix3fv
-      this.iT = !0
+      this.setter = a.uniformMatrix3fv
+      this.isMatrix = !0
       break
     case 35676:
-      this.um = a.uniformMatrix4fv
-      this.iT = !0
+      this.setter = a.uniformMatrix4fv
+      this.isMatrix = !0
       break
     case 35678:
     case 35680:
-      this.um = a.uniform1i
+      this.setter = a.uniform1i
       break
     default:
       throw Error('Unrecognized uniform type: ' + b)
@@ -593,7 +593,7 @@ var PX = function (a, b, c) {
 }
   , QX = function (a, b, c, e) {
   PX.call(this, a, b, c)
-  this.Fu = e
+  this.textureX = e
 }
 u(QX, PX)
 d = MX.prototype
@@ -665,7 +665,7 @@ d.Dg = function (a, b) {
     throw Error('No uniform named "' + a + '"')
   var e = this.Sc, f
   f = 2 == arguments.length ? b : Array.prototype.slice.call(arguments, 1)
-  c.iT ? c.um.call(e, c.UAa, !1, f) : c.um.call(e, c.UAa, f)
+  c.isMatrix ? c.setter.call(e, c.location, !1, f) : c.setter.call(e, c.location, f)
 }
 
 var cY = function (a) {
@@ -682,7 +682,7 @@ var cY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -707,7 +707,7 @@ var dY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -733,7 +733,7 @@ var eY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -759,7 +759,7 @@ var fY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -781,7 +781,7 @@ var gY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -807,7 +807,7 @@ var hY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
@@ -833,7 +833,7 @@ var iY = function (a) {
         var k = a.getUniformLocation(this.handle, f.name)
           , f = f.type
         35678 == f || 35680 == f ? (f = new QX(a, f, k, c++),
-          a.uniform1i(k, f.Fu),
+          a.uniform1i(k, f.textureX),
           this.gu[h] = f) : this.Vr[h] = new PX(a, f, k)
       }
     }
