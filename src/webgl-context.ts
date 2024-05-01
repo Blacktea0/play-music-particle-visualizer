@@ -130,6 +130,7 @@ export class ShaderProgram {
       this.attributes[reverseRenaming[attrib.name]] = this.attribCount++
     }
     const activeUniforms = gl.getProgramParameter(this.handle, WebGLRenderingContext.ACTIVE_UNIFORMS)
+    let samplerCount = 0
     for (let i = 0; i < activeUniforms; i++) {
       const uniform = gl.getActiveUniform(this.handle, i)
       if (uniform == null) {
@@ -142,7 +143,6 @@ export class ShaderProgram {
       if (location == null) {
         throw Error('Failed to get uniform location')
       }
-      let samplerCount = 0
       if (type === WebGLRenderingContext.SAMPLER_2D || type === WebGLRenderingContext.SAMPLER_CUBE) {
         const sampler = new Sampler(gl, type, location, samplerCount++)
         gl.uniform1i(location, sampler.textureX)

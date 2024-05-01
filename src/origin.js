@@ -406,7 +406,7 @@ MX.prototype.Lx = function (a) {
 }
 
 MX.prototype.bindTexture = function (a, b) {
-  var c = this.Nx.E3a(a)
+  var c = this.Nx.getSampler(a)
   if (void 0 != c)
     this.Sc.activeTexture(33984 + c.textureX),
       this.Sc.bindTexture(3553, b.handle)
@@ -532,7 +532,7 @@ OX.prototype.getUniform = function (a) {
   return b
 }
 
-OX.prototype.E3a = function (a) {
+OX.prototype.getSampler = function (a) {
   var b = this.samplers[a]
   if (!b)
     throw Error('No sampler named: ' + a)
@@ -897,13 +897,13 @@ var wY = function (a, b, c, e) {
   this.KL = Math.floor(this.fq.width / b)
   this.JL = Math.floor(this.fq.height / b)
   this.gSa = this.KL / this.JL
-  this.ISa = this.Ha.createProgram(dY)
-  this.Ha.createProgram(cY)
-  this.KUa = this.Ha.createProgram(eY)
-  this.Kab = this.Ha.createProgram(fY)
-  this.Oib = this.Ha.createProgram(gY)
-  this.Ulb = this.Ha.createProgram(hY)
-  this.rBb = this.Ha.createProgram(iY)
+  this.ISa = this.Ha.createProgram(Dy)
+  this.Ha.createProgram(Cy)
+  this.KUa = this.Ha.createProgram(Ey)
+  this.Kab = this.Ha.createProgram(Fy)
+  this.Oib = this.Ha.createProgram(Gy)
+  this.Ulb = this.Ha.createProgram(Hy)
+  this.rBb = this.Ha.createProgram(Iy)
   this.qCb = this.vVa(32)
   b = new Uint8Array(16384)
   for (c = 0; c < b.length; ++c)
