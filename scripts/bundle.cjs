@@ -14,5 +14,8 @@ configure({
       renaming: 'all'
     }),
     livereloadPlugin({})
-  ]
+  ],
+  loader: {
+    '.mp3': 'file'
+  }
 })

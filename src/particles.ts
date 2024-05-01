@@ -1,4 +1,11 @@
-import { type Buffer, type Framebuffer, type ShaderProgram, type Texture, TextureOptions, type WebGLContext } from './webgl-context'
+import {
+  type Buffer,
+  type Framebuffer,
+  type ShaderProgram,
+  type Texture,
+  TextureOptions,
+  type WebGLContext
+} from './webgl-context'
 import { AudioInfo } from './audio-info'
 import { ParticleSystem } from './particle-system'
 import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
@@ -30,7 +37,7 @@ export class Particles {
   private previousTime: number | null
   private particleSystemCenterPosition: Float32Array
   private cameraPosition: Float32Array
-  private timeSamples: Float32Array
+  private readonly timeSamples: Float32Array
   private timeSamplesCount: number
   private particleScaleFactor: number
   private isParticleScaleDecreasing: boolean
@@ -62,7 +69,9 @@ export class Particles {
     this.noiseTexture = this.createNoiseTexture(32)
 
     const random = new Uint8Array(16384)
-    for (let i = 0; i < random.length; ++i) random[i] = Math.floor(255 * Math.random())
+    for (let i = 0; i < random.length; ++i) {
+      random[i] = Math.floor(255 * Math.random())
+    }
 
     this.grainTex = this.glContext.createTexture(128, 128, {
       filter: WebGLRenderingContext.NEAREST,
@@ -85,7 +94,7 @@ export class Particles {
     this.alphaBlendFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, false)
 
     const float32Array = new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0])
-    this.vertexBuffer = this.glContext.createBuffer(2, gl.STATIC_DRAW, float32Array)
+    this.vertexBuffer = this.glContext.createBuffer(2, WebGLRenderingContext.STATIC_DRAW, float32Array)
 
     this.time = 60 * Math.random()
     this.previousTime = null
@@ -97,10 +106,10 @@ export class Particles {
     this.isParticleScaleDecreasing = false
     this.scaleIncreaseCount = this.scaleDecreaseCount = 0
 
-    const someTexture = new ParticleTexture(this.glContext, 512, 1024)
+    const particleTexture = new ParticleTexture(this.glContext, 512, 1024)
     this.particleSystems = [
-      new ParticleSystem(this.glContext, someTexture, 0, 20, random100),
-      new ParticleSystem(this.glContext, someTexture, 20, 200, random100 + 50 + 50 * Math.random())
+      new ParticleSystem(this.glContext, particleTexture, 0, 20, random100),
+      new ParticleSystem(this.glContext, particleTexture, 20, 200, random100 + 50 + 50 * Math.random())
     ]
 
     this.glContext.colorMask(true, true, true, true)
@@ -228,13 +237,17 @@ export class Particles {
   }
 
   updateTimeBasedState (deltaTime: number): number {
-    for (let i = this.timeSamples.length - 1; i > 0; --i) { this.timeSamples[i] = this.timeSamples[i - 1] }
+    for (let i = this.timeSamples.length - 1; i > 0; --i) {
+      this.timeSamples[i] = this.timeSamples[i - 1]
+    }
 
     this.timeSamples[0] = 1000 * deltaTime
     this.timeSamplesCount = Math.min(30, this.timeSamplesCount + 1)
 
     let sum = 0
-    for (let i = 0; i < this.timeSamplesCount; ++i) { sum += this.timeSamples[i] }
+    for (let i = 0; i < this.timeSamplesCount; ++i) {
+      sum += this.timeSamples[i]
+    }
 
     sum /= this.timeSamplesCount
 

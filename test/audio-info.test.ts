@@ -42,7 +42,7 @@ Minified.prototype.updateAudioData = function (a) {
 /* eslint-enable */
 
 describe('AudioInfo', () => {
-  test('test applyGaussianBlur', () => {
+  test('applyGaussianBlur', () => {
     const input = new Float32Array(256)
     for (let i = 0; i < input.length; i++) {
       input[i] = Math.random()
@@ -55,7 +55,7 @@ describe('AudioInfo', () => {
     expect(actual).toEqual(expected)
   })
 
-  test('test updateAudioData', () => {
+  test('updateAudioData', () => {
     const audioInfo = new AudioInfo(256)
     // @ts-expect-error for test
     const minified = new Minified(256)

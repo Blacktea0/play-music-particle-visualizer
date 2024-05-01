@@ -4,7 +4,7 @@ attribute vec2 uv;
 export void vertex()
 {
     varyingTexCoord = uv;
-    gl_Position = vec4(uv * 2. - vec2(1), 1, 1);
+    gl_Position = vec4(uv * 2.0 - vec2(1), 1, 1);
 }
 
 precision mediump float;
@@ -15,9 +15,9 @@ export void fragment()
     vec4 sampledColor, outputColor;
     sampledColor = texture2D(tex, varyingTexCoord);
     float sumRG, sumBA;
-    sumRG = .5 * (sampledColor.x + sampledColor.y);
-    sumBA = .5 * (sampledColor.z + sampledColor.w);
+    sumRG = 0.5 * (sampledColor.x + sampledColor.y);
+    sumBA = 0.5 * (sampledColor.z + sampledColor.w);
     outputColor = vec4(color0 * sumRG + color1 * sumBA, sumRG + sumBA);
-    gl_FragColor = 2. * sqrt(outputColor);
+    gl_FragColor = 2.0 * sqrt(outputColor);
     gl_FragColor.xyz = vec3(1) - gl_FragColor.xyz;
 }

@@ -1,4 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom'
+  testEnvironment: 'jsdom',
+  setupFiles: [
+    'jest-webgl-canvas-mock'
+  ]
 }

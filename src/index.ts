@@ -1,6 +1,6 @@
 import { WebGLContext } from './webgl-context'
 import { Particles } from './particles'
-import { RandomDatasource } from '../test/test-utils'
+import url from '../assets/flow.mp3'
 
 main()
 
@@ -29,13 +29,25 @@ function main (): void {
     }
   }
 
-  const analyserNode = new RandomDatasource()
-  const webGLContext = new WebGLContext(canvas, gl)
-  const particles = new Particles(analyserNode, gl, canvas, webGLContext)
-  particles.renderBackground()
-  function render (now: number): void {
-    particles.update(now)
+  canvas.addEventListener('click', async (e) => {
+    const audioCtx = new AudioContext()
+    const audio = new Audio(url)
+    const audioElement = document.body.appendChild(audio)
+    const analyserNode = audioCtx.createAnalyser()
+    const track = audioCtx.createMediaElementSource(audioElement)
+    track.connect(analyserNode)
+    await audioCtx.resume()
+    await audioElement.play()
+
+    const webGLContext = new WebGLContext(canvas, gl)
+    const particles = new Particles(analyserNode, gl, canvas, webGLContext)
+    particles.renderBackground()
+
+    function render (now: number): void {
+      particles.update(now)
+      requestAnimationFrame(render)
+    }
+
     requestAnimationFrame(render)
-  }
-  requestAnimationFrame(render)
+  })
 }

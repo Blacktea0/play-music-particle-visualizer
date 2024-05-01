@@ -5,10 +5,11 @@ import { type ParticleTexture } from './particle-texture'
 export class ParticleSystem {
   private readonly startIndex: number
   private currentLifetime: number = 0
+  private prevLivetime: number = 0
   private maxLifetime: number = 0
   position: Float32Array = new Float32Array(3)
   readonly velocity: Float32Array = new Float32Array(3)
-  private readonly textureData: [Float32Array, Float32Array] = [new Float32Array(0), new Float32Array(0)]
+  private readonly textureData: [Float32Array, Float32Array]
   private readonly particleSize: number
   readonly particleTexture: Texture
   framebuffer0: Framebuffer
@@ -18,12 +19,14 @@ export class ParticleSystem {
   constructor (gl: WebGLContext, texture: ParticleTexture, startIndex: number, endIndex: number, maxLifetime: number) {
     this.startIndex = startIndex
     this.maxLifetime = maxLifetime
+    const dataLen = endIndex - startIndex
+    this.textureData = [new Float32Array(dataLen), new Float32Array(dataLen)]
     this.particleSize = texture.size
     this.particleTexture = texture.texture
 
     const textureOptions: TextureOptions = {
       type: WebGLRenderingContext.FLOAT,
-      filter: WebGLRenderingContext.LINEAR,
+      filter: WebGLRenderingContext.NEAREST,
       format: null,
       wrap: null,
       data: null
@@ -32,8 +35,6 @@ export class ParticleSystem {
     this.framebuffer0 = gl.createFramebuffer(texture.width, texture.height, textureOptions, false)
     this.framebuffer1 = gl.createFramebuffer(texture.width, texture.height, textureOptions, false)
     this.positionBuffer = texture.buffer
-    this.textureData[0] = new Float32Array(endIndex - startIndex)
-    this.textureData[1] = new Float32Array(endIndex - startIndex)
 
     this.updatePosition(0)
   }
@@ -52,9 +53,9 @@ export class ParticleSystem {
     const distance = 0.01 / (0.001 + Math.sqrt(dx * dx + dy * dy + dz * dz))
     const factor = 0.3 * Math.log(1 + 5 * distance)
 
-    this.maxLifetime += this.currentLifetime * deltaTime * factor
+    this.maxLifetime += this.prevLivetime * deltaTime * factor
     const newPosition = getTargetPosition(this.maxLifetime, 1.5, 3)
-    vec3Sub(newPosition, currentPosition, this.velocity)
+    vec3Sub(newPosition, this.position, this.velocity)
     this.position = newPosition
   }
 
@@ -70,7 +71,7 @@ export class ParticleSystem {
 
     const normalizedDifference = Math.min(1, maxDifference)
     this.currentLifetime = Math.max(0.95 * this.currentLifetime, normalizedDifference)
-    this.currentLifetime = Math.max(0.9 * this.currentLifetime, 3 * this.currentLifetime)
+    this.prevLivetime = Math.max(0.9 * this.prevLivetime, 3 * this.currentLifetime)
 
     for (let i = 0; i < dataLength; ++i) {
       this.textureData[1][i] = this.textureData[0][i]

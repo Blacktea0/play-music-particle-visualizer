@@ -10,6 +10,6 @@ export class RandomDatasource implements FloatFrequencyDatasource {
 
 export class ConstantDatasource implements FloatFrequencyDatasource {
   getFloatFrequencyData (data: Float32Array): void {
-    data.fill(1)
+    data.fill(-42)
   }
 }

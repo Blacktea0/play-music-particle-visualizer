@@ -1196,7 +1196,7 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
   this.particleRenderFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
   this.colorBlendFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
   this.alphaBlendFramebuffer = this.glContext.createFramebuffer(this.width, this.height, colorConfig, !1);
-  this.buffer = this.glContext.createBuffer(2, 35044 /*GL_STATIC_DRAW*/, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
+  this.vertexBuffer = this.glContext.createBuffer(2, 35044 /*GL_STATIC_DRAW*/, new Float32Array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0]));// Create Buffer
   this.time = 60 * Math.random();
   this.previousTime = null;
   this.particleSystemCenterPosition = new Float32Array(3);
@@ -1214,12 +1214,12 @@ var Particles = function (analyserNode, gl, canvas, glContext) {
   this.glContext.disable(2884); // CULL_FACE
   this.glContext.disable(3042); // BLEND
   this.glContext.activateProgram(this.renderParticleSystemProgram);
-  this.glContext.bindAttributeBuffer("uv", this.buffer);
+  this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
   for (i = 0; i < this.particleSystems.length; ++i)
-    this.glContext.bindFramebuffer(this.particleSystems[i].Tt),
-      this.glContext.drawArrays(4, 0, this.buffer.vertexCount),
-      this.glContext.bindFramebuffer(this.particleSystems[i].gV),
-      this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
+    this.glContext.bindFramebuffer(this.particleSystems[i].framebuffer0),
+      this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount),
+      this.glContext.bindFramebuffer(this.particleSystems[i].framebuffer1),
+      this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount);
   this.updateCenterPoint()
 };
 u(Particles, Updatable); // inherit from UX. UX.prototype.update = function() {};
@@ -1348,21 +1348,21 @@ Particles.prototype.renderForeground = function (a) {
       , e = c.getOpacity()
       , f = 3 * e
       , h = 12 * f * f * f
-      , k = c.gV;
-    c.gV = c.Tt;
-    c.Tt = k;
-    k = Math.floor(this.particleScaleFactor * c.Tt.height) / c.Tt.height;
-    this.glContext.bindFramebuffer(c.Tt);
-    this.glContext.bindTexture("randomTex", c.texture);
-    this.glContext.bindTexture("positionTex", c.gV.colorTexture);
-    this.glContext.bindAttributeBuffer("uv", this.buffer);
+      , k = c.framebuffer1;
+    c.framebuffer1 = c.framebuffer0;
+    c.framebuffer0 = k;
+    k = Math.floor(this.particleScaleFactor * c.framebuffer0.height) / c.framebuffer0.height;
+    this.glContext.bindFramebuffer(c.framebuffer0);
+    this.glContext.bindTexture("randomTex", c.particleTexture);
+    this.glContext.bindTexture("positionTex", c.framebuffer1.colorTexture);
+    this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
     this.glContext.setUniform("emitterSize", .01 + f, h, a * e * 30);
     this.glContext.setUniform("pos0", this.particleSystems[b].position);
-    this.glContext.setUniform("vel0", this.particleSystems[b].gha);
+    this.glContext.setUniform("vel0", this.particleSystems[b].velocity);
     this.glContext.setUniform("pos1", this.particleSystems[1 - b].position);
-    this.glContext.setUniform("vel1", this.particleSystems[1 - b].gha);
+    this.glContext.setUniform("vel1", this.particleSystems[1 - b].velocity);
     this.glContext.setUniform("quality", k);
-    this.glContext.drawArrays(4, 0, this.buffer.vertexCount) // drawArrays
+    this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount) // drawArrays
   }
 }
 ;
@@ -1484,9 +1484,9 @@ Particles.prototype.setupMatrices = function () {
   this.glContext.setUniform("density", c);
   for (c = 0; 2 > c; ++c)
     a = this.particleSystems[c],
-      this.glContext.bindTexture("positionTex", a.Tt.colorTexture),
+      this.glContext.bindTexture("positionTex", a.framebuffer0.colorTexture),
       this.glContext.bindAttributeBuffer("uv", a.buffer),
-      a = Math.floor(this.particleScaleFactor * a.Tt.height) * a.Tt.width,
+      a = Math.floor(this.particleScaleFactor * a.framebuffer0.height) * a.framebuffer0.width,
       e = Math.floor(a / 2),
       0 == c ? (this.glContext.colorMask(!0, !1, !1, !1),
         this.glContext.drawArrays(0, 0, e),
@@ -1499,10 +1499,10 @@ Particles.prototype.setupMatrices = function () {
   this.glContext.bindFramebuffer(this.colorBlendFramebuffer);
   this.glContext.activateProgram(this.colorBlendProgram);
   this.glContext.bindTexture("tex", this.particleRenderFramebuffer.colorTexture);
-  this.glContext.bindAttributeBuffer("uv", this.buffer);
+  this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
   this.glContext.setUniform("color0", this.colorFromHue(.05 * this.time, .85));
   this.glContext.setUniform("color1", this.colorFromHue(.05 * this.time + 2, .85));
-  this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
+  this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount)
 }
 ;
 // init component
@@ -1512,26 +1512,26 @@ Particles.prototype.renderBackground = function () {
   this.glContext.bindFramebuffer(this.particleRenderFramebuffer);
   this.glContext.activateProgram(this.particleUpdateProgram);
   this.glContext.bindTexture("mainTex", this.colorBlendFramebuffer.colorTexture);
-  this.glContext.bindAttributeBuffer("uv", this.buffer);
+  this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
   this.glContext.setUniform("duv", 1 / this.width, 0);
   this.glContext.setUniform("alphaScaleOffset", 1, 0);
-  this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
+  this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount);
   this.glContext.enable(3042);
   this.glContext.blendFunc(770, 771);
   this.glContext.bindFramebuffer(this.alphaBlendFramebuffer);
   this.glContext.bindTexture("mainTex", this.particleRenderFramebuffer.colorTexture);
-  this.glContext.bindAttributeBuffer("uv", this.buffer);
+  this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
   this.glContext.setUniform("duv", 0, 1 / this.height);
   this.glContext.setUniform("alphaScaleOffset", .25, .75);
-  this.glContext.drawArrays(4, 0, this.buffer.vertexCount);
+  this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount);
   this.glContext.disable(3042);
   this.glContext.bindFramebuffer(null);
   this.glContext.activateProgram(this.finalRenderProgram);
   this.glContext.bindTexture("mainTex", this.alphaBlendFramebuffer.colorTexture);
   this.glContext.bindTexture("grainTex", this.grainTex);
-  this.glContext.bindAttributeBuffer("uv", this.buffer);
+  this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
   this.glContext.setUniform("grainScaleOffset", this.canvas.width / this.grainTex.width, this.canvas.height / this.grainTex.height, Math.random(), Math.random());
-  this.glContext.drawArrays(4, 0, this.buffer.vertexCount)
+  this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount)
 }
 ;
 Particles.prototype.updateCenterPoint = function () {
@@ -1611,21 +1611,21 @@ ParticleTexture.prototype.createGradientBuffer = function (a) {
  * @param f
  */
 var ParticleSystem = function (gl, b, c, e, f) {
-  this.doa = c;
+  this.startIndex = c;
   this.tfa = this.RV = 0;
-  this.MX = f;
+  this.maxLifetime = f;
   this.position = new Float32Array(3);
-  this.gha = new Float32Array(3);
-  this.TE = [new Float32Array(e - c), new Float32Array(e - c)];
-  this.size = b.size;
-  this.texture = b.texture;
+  this.velocity = new Float32Array(3);
+  this.textureData = [new Float32Array(e - c), new Float32Array(e - c)];
+  this.particleSize = b.size;
+  this.particleTexture = b.texture;
   c = {
     type: 5126,
     filter: 9728
   };
-  this.Tt = gl.createFramebuffer(b.width, b.height, c, !1);
-  this.gV = gl.createFramebuffer(b.width, b.height, c, !1);
-  this.buffer = b.buffer;
+  this.framebuffer0 = gl.createFramebuffer(b.width, b.height, c, !1);
+  this.framebuffer1 = gl.createFramebuffer(b.width, b.height, c, !1);
+  this.positionBuffer = b.buffer;
   this.updatePosition(0)
 };
 ParticleSystem.prototype.update = function (a, b) {
@@ -1635,29 +1635,29 @@ ParticleSystem.prototype.update = function (a, b) {
 ;
 ParticleSystem.prototype.updatePosition = function (a) {
   var b = this.position
-    , c = getTargetPosition(this.MX + .01, 1.5, 3)
+    , c = getTargetPosition(this.maxLifetime + .01, 1.5, 3)
     , e = b[0] - c[0]
     , f = b[1] - c[1]
     , b = b[2] - c[2]
     , e = .01 / (.001 + Math.sqrt(e * e + f * f + b * b))
     , e = .3 * Math.log(1 + 5 * e);
-  this.MX += this.tfa * a * e;
-  a = getTargetPosition(this.MX, 1.5, 3);
-  vec3Sub(a, this.position, this.gha);
+  this.maxLifetime += this.tfa * a * e;
+  a = getTargetPosition(this.maxLifetime, 1.5, 3);
+  vec3Sub(a, this.position, this.velocity);
   this.position = a
 }
 ;
 ParticleSystem.prototype.updateTextureData = function (a) {
-  for (var b = this.TE[0].length, c = 0, e = 0; e < b; ++e)
-       var f = a[e + this.doa] - Math.min(this.TE[0][e], this.TE[1][e])
+  for (var b = this.textureData[0].length, c = 0, e = 0; e < b; ++e)
+       var f = a[e + this.startIndex] - Math.min(this.textureData[0][e], this.textureData[1][e])
          , f = 4 * f
          , c = Math.max(c, f);
   c = Math.min(1, c);
   this.RV = Math.max(.95 * this.RV, c);
   this.tfa = Math.max(.9 * this.tfa, 3 * this.RV);
   for (e = 0; e < b; ++e)
-    this.TE[1][e] = this.TE[0][e],
-      this.TE[0][e] = a[e + this.doa]
+    this.textureData[1][e] = this.textureData[0][e],
+      this.textureData[0][e] = a[e + this.startIndex]
 }
 ;
 ParticleSystem.prototype.getOpacity = function () {
@@ -1689,4 +1689,64 @@ EY.prototype.getFloatFrequencyData = function (a) {
 }
 ;
 
+var zU = function(a, b, c) {
+  Ja.call(this);
+  this.Sb = null;
+  this.eha = !1;
+  this.jf = a;
+  this.Kb = c;
+  this.Yr = b || window;
+  this.yj = q(this.Es, this)
+};
+u(zU, Ja);
+zU = zU.prototype;
+zU.prototype.start = function() {
+  this.stop();
+  this.eha = !1;
+  var a = this.getRequestAnimationFrameFn()
+    , b = this.getCancelAnimationFrameFn();
+  a && !b && this.Yr.mozRequestAnimationFrame ? (this.Sb = v(this.Yr, "MozBeforePaint", this.yj),
+    this.Yr.mozRequestAnimationFrame(null),
+    this.eha = !0) : this.Sb = a && b ? a.call(this.Yr, this.yj) : this.Yr.setTimeout(Jba(this.yj), 20)
+}
+;
+zU.prototype.stop = function() {
+  if (this.Xm()) {
+    var a = this.getRequestAnimationFrameFn()
+      , b = this.getCancelAnimationFrameFn();
+    a && !b && this.Yr.mozRequestAnimationFrame ? Ad(this.Sb) : a && b ? b.call(this.Yr, this.Sb) : this.Yr.clearTimeout(this.Sb)
+  }
+  this.Sb = null
+}
+;
+zU.prototype.xC = function() {
+  this.stop();
+  this.Es()
+}
+;
+zU.prototype.Xm = function() {
+  return null != this.Sb
+}
+;
+zU.prototype.Es = function() {
+  this.eha && this.Sb && Ad(this.Sb);
+  this.Sb = null;
+  this.jf.call(this.Kb, t())
+}
+;
+zU.prototype.Oa = function() {
+  this.stop();
+  zU.Aa.Oa.call(this)
+}
+;
+zU.prototype.getRequestAnimationFrameFn = function() {
+  var a = this.Yr;
+  return a.requestAnimationFrame || a.webkitRequestAnimationFrame || a.mozRequestAnimationFrame || a.oRequestAnimationFrame || a.msRequestAnimationFrame || null
+}
+;
+// jpa
+zU.prototype.getCancelAnimationFrameFn = function() {
+  var a = this.Yr;
+  return a.cancelAnimationFrame || a.cancelRequestAnimationFrame || a.webkitCancelRequestAnimationFrame || a.mozCancelRequestAnimationFrame || a.oCancelRequestAnimationFrame || a.msCancelRequestAnimationFrame || null
+}
 

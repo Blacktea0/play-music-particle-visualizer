@@ -12,7 +12,7 @@ var minifiedGetTargetPosition = function (a, b, c) {
 /* eslint-enabled */
 
 describe('utils', () => {
-  test('test getTargetPosition', () => {
+  test('getTargetPosition', () => {
     const a = 50
     const b = 1.5
     const c = 3
