@@ -1,5 +1,5 @@
 import url from '../assets/flow.mp3'
-import { Sampler } from './webgl-context'
+import { Sampler, Uniform } from './webgl-context'
 
 var d
 
@@ -19,7 +19,6 @@ var u = function (a, b) {
 
 var UX = function () {}
 UX.prototype.update = function () {}
-
 
 var Ja = function () {
   this.nC = this.nC
@@ -50,7 +49,6 @@ d.Oa = function () {
     for (; this.Oz.length;)
       this.Oz.shift()()
 }
-
 
 var kd = 'closure_listenable_' + (1E6 * Math.random() | 0)
 
@@ -161,7 +159,6 @@ d.hasListener = function (a, b) {
   return this.Ks.hasListener(l(a) ? String(a) : void 0, b)
 }
 
-
 var ZX = function (a, b) {
   Q.call(this)
   this.Ve = a
@@ -182,7 +179,6 @@ d.stop = function () {}
 d.c8 = function () {
   return !1
 }
-
 
 var HY = function (a, b) {
   ZX.call(this, b.displayName, b.identifier)
@@ -296,7 +292,6 @@ d.Yjb = function (a, b) {
       this.Jx.start()) : this.stop()) : this.stop()
 }
 
-
 var zU = function (a, b, c) {
   Ja.call(this)
   this.Sb = null
@@ -356,7 +351,6 @@ d.jpa = function () {
   var a = this.Yr
   return a.cancelAnimationFrame || a.cancelRequestAnimationFrame || a.webkitCancelRequestAnimationFrame || a.mozCancelRequestAnimationFrame || a.oCancelRequestAnimationFrame || a.msCancelRequestAnimationFrame || null
 }
-
 
 var MX = function (a, b) {
   Ja.call(this)
@@ -1442,7 +1436,6 @@ vY.prototype.xBb = function (a) {
 vY.prototype.czb = function () {
   return .05 * this.RV
 }
-
 
 // entrance
 const canvas = document.querySelector('canvas')
