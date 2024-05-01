@@ -76,9 +76,9 @@ export class Sampler extends Uniform {
 export class ShaderProgram {
   readonly handle: WebGLProgram
   attribCount: number = 0
-  readonly attribMapping: Record<string, GLint> = {}
-  readonly samplerMapping: Record<string, Sampler> = {}
-  readonly uniformMapping: Record<string, Uniform> = {}
+  readonly attributes: Record<string, GLint> = {}
+  readonly samplers: Record<string, Sampler> = {}
+  readonly uniforms: Record<string, Uniform> = {}
 
   constructor (gl: WebGLRenderingContext, vsSource: string, fsSource: string) {
     const program = gl.createProgram()
@@ -127,7 +127,7 @@ export class ShaderProgram {
         throw Error('Failed to get active attribute')
       }
       gl.bindAttribLocation(this.handle, i, attrib.name)
-      this.attribMapping[reverseRenaming[attrib.name]] = this.attribCount++
+      this.attributes[reverseRenaming[attrib.name]] = this.attribCount++
     }
     const activeUniforms = gl.getProgramParameter(this.handle, WebGLRenderingContext.ACTIVE_UNIFORMS)
     for (let i = 0; i < activeUniforms; i++) {
@@ -146,15 +146,15 @@ export class ShaderProgram {
       if (type === WebGLRenderingContext.SAMPLER_2D || type === WebGLRenderingContext.SAMPLER_CUBE) {
         const sampler = new Sampler(gl, type, location, samplerCount++)
         gl.uniform1i(location, sampler.textureX)
-        this.samplerMapping[name] = sampler
+        this.samplers[name] = sampler
       } else {
-        this.uniformMapping[name] = new Uniform(gl, type, location)
+        this.uniforms[name] = new Uniform(gl, type, location)
       }
     }
   }
 
   getUniform (name: string): Uniform {
-    const uniform = this.uniformMapping[name]
+    const uniform = this.uniforms[name]
     if (uniform == null) {
       throw Error('No uniform named: ' + name)
     }
@@ -162,7 +162,7 @@ export class ShaderProgram {
   }
 
   getSampler (name: string): Sampler {
-    const sampler = this.samplerMapping[name]
+    const sampler = this.samplers[name]
     if (sampler == null) {
       throw Error('No sampler named: ' + name)
     }
@@ -388,7 +388,7 @@ export class WebGLContext {
   }
 
   bindAttributeBuffer (name: string, buffer: Buffer): void {
-    const location = this.usingProgram?.attribMapping[name]
+    const location = this.usingProgram?.attributes[name]
     if (location == null) {
       throw Error('No using program')
     }
@@ -479,7 +479,7 @@ export class WebGLContext {
   }
 
   setUniform (name: string, ...values: any): void {
-    const uniform = this.usingProgram?.uniformMapping[name]
+    const uniform = this.usingProgram?.uniforms[name]
     if (uniform == null) {
       throw new Error(`No uniform named "${name}"`)
     }

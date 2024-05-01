@@ -1,5 +1,6 @@
 import url from '../assets/flow.mp3'
 import { Sampler, Uniform } from './webgl-context'
+import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
 
 var d
 
@@ -391,8 +392,8 @@ MX.prototype.Oa = function () {
 
 MX.prototype.Lx = function (a) {
   if (this.Nx != a) {
-    var b = this.Nx ? this.Nx.We : 0
-      , c = a.We
+    var b = this.Nx ? this.Nx.attribCount : 0
+      , c = a.attribCount
     if (b > c)
       for (var e = c; e < b; ++e)
         this.Sc.disableVertexAttribArray(e)
@@ -499,9 +500,9 @@ var aka = function (a, b, c, e) {
   , OX = function (a, b, c) {
   this.handle = a.createProgram()
   this.attributes = {}
-  this.We = 0
-  this.Vr = {}
-  this.gu = {}
+  this.attribCount = 0
+  this.uniforms = {}
+  this.samplers = {}
   var e = a.createShader(a.VERTEX_SHADER)
     , f = a.createShader(a.FRAGMENT_SHADER)
   a.shaderSource(e, b)
@@ -525,14 +526,14 @@ var aka = function (a, b, c, e) {
     throw Error('Error linking program:\n' + a.getProgramInfoLog(this.handle))
 }
 OX.prototype.getUniform = function (a) {
-  var b = this.Vr[a]
+  var b = this.uniforms[a]
   if (!b)
     throw Error('No uniform named: ' + a)
   return b
 }
 
 OX.prototype.E3a = function (a) {
-  var b = this.gu[a]
+  var b = this.samplers[a]
   if (!b)
     throw Error('No sampler named: ' + a)
   return b
@@ -602,7 +603,7 @@ d.getSupportedExtensions = function () {
 }
 
 d.Dg = function (a, b) {
-  var c = this.Nx.Vr[a]
+  var c = this.Nx.uniforms[a]
   if (!c)
     throw Error('No uniform named "' + a + '"')
   var e = this.Sc, f
@@ -612,9 +613,9 @@ d.Dg = function (a, b) {
 
 var cY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;uniform vec4 c;void main(){a=b;vec2 d=b*c.xy+c.zw;gl_Position=vec4(d*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;uniform sampler2D d;void main(){vec4 e=texture2D(d,a);gl_FragColor=e;}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -625,7 +626,7 @@ var cY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -637,9 +638,9 @@ var dka = {
 }
 var dY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec2 d,e;void main(){vec4 f,g,h,i,j,k,l,m,n,o,p,q,r,s,t;f=texture2D(c,a);g=texture2D(c,a-d);h=texture2D(c,a+d);i=texture2D(c,a-2.*d);j=texture2D(c,a+2.*d);k=texture2D(c,a-3.*d);l=texture2D(c,a+3.*d);m=vec4(0);n=vec4(1);o=.8521*max(m,n-.7*abs(g-f));p=.8521*max(m,n-.7*abs(h-f));q=.5273*max(m,n-2.*abs(i-f));r=.5273*max(m,n-2.*abs(j-f));s=.2369*max(m,n-2.*abs(k-f));t=.2369*max(m,n-2.*abs(l-f));f+=o*g+p*h+q*i+r*j+s*k+t*l;gl_FragColor=f/(o+p+q+r+s+t+1.);gl_FragColor.a=e.x*gl_FragColor.a+e.y;}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -650,7 +651,7 @@ var dY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -663,9 +664,9 @@ var eka = {
 }
 var eY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;uniform sampler2D c;uniform vec3 d,e;void main(){vec4 f,i;f=texture2D(c,a);float g,h;g=.5*(f.x+f.y);h=.5*(f.z+f.w);i=vec4(d*g+e*h,g+h);gl_FragColor=2.*sqrt(i);gl_FragColor.xyz=vec3(1)-gl_FragColor.xyz;}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -676,7 +677,7 @@ var eY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -689,9 +690,9 @@ var fka = {
 }
 var fY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;void main(){gl_FragColor=vec4(0,-10000,0,0);}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -702,7 +703,7 @@ var fY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -711,9 +712,9 @@ u(fY, OX)
 var gka = {}
 var gY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;void main(){a=b;gl_Position=vec4(b*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;uniform sampler2D c,d;uniform vec4 e;void main(){vec2 f=a*2.-vec2(1);float g,h;g=smoothstep(.2,5.,dot(f,f));h=texture2D(c,a*e.xy+e.zw).w;vec3 i=texture2D(d,a).xyz;i*=1.-g;gl_FragColor.xyz=abs(i-.05*h);gl_FragColor.w=1.;}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -724,7 +725,7 @@ var gY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -737,9 +738,9 @@ var hka = {
 }
 var hY = function (a) {
   OX.call(this, a, 'precision mediump float;attribute vec2 a;uniform sampler2D b;uniform mat4 c;void main(){vec4 d=texture2D(b,a);gl_Position=c*vec4(d.xyz,1);gl_PointSize=1.+min(1./gl_Position.w,64.);}', 'precision mediump float;uniform float d;void main(){vec2 a=2.*(gl_PointCoord-vec2(.5));float e=1.-smoothstep(0.,1.,dot(a,a));gl_FragColor=vec4(d*e);}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'a')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'a')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -750,7 +751,7 @@ var hY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
@@ -763,9 +764,9 @@ var ika = {
 }
 var iY = function (a) {
   OX.call(this, a, 'precision mediump float;varying vec2 a;attribute vec2 b;uniform float c;void main(){a=b*vec2(1,c);gl_Position=vec4(a*2.-vec2(1),1,1);}', 'precision mediump float;varying vec2 a;uniform sampler2D d,e,f;uniform vec2 g,h;uniform vec3 i,j,k,l,m,n;const float o=32.;const float p=.5/(o*(o-1.));const float q=o/(o-1.);const float r=(o-1.)/(o*o);const float s=o;const float t=1./o;vec3 F(vec3 u){float v=p+floor(u.z)*t;return texture2D(f,vec2(u.x,v+fract(u.y*q)*r)).xyz;}vec3 G(vec3 u){u.z*=o;vec3 v,w,x,A,B,C,D,E;v=u*.03-g.x*vec3(.03,.05,.07);w=F(v);x=F(v+vec3(0,0,1));A=2.*mix(w,x,fract(v.z))-vec3(1);B=u*.15+g.x*vec3(.01,.02,.03);C=F(B);D=F(B+vec3(0,0,1));E=2.*mix(C,D,fract(B.z))-vec3(1);return 8.*A+5.*E+m;}vec3 H(vec4 u,vec3 v,vec3 w){vec3 x,B;x=u.xyz-v;float A=dot(x,x);B=x/(1.+A*A);B*=1.5*max(0.,dot(x,w));return B;}vec3 I(vec4 u,vec3 v,float w){vec3 x,A;x=u.xyz-v;A=(1.-smoothstep(0.,.5,u.w))*normalize(x);return A*w;}void main(){vec4 u,w;u=texture2D(d,a);float v,B,C,D;v=texture2D(e,a+h).w;w=texture2D(e,a);vec3 x,A,E;x=i-w.w*j;A=k-w.w*l;B=n.x;C=n.y;D=n.z;if(v<C)u=vec4(x+B*w.xyz,0);u.xyz+=H(u,x,j)+H(u,A,l)+I(u,x,D);E=G(u.xyz);u.xyz+=g.y*30.*.002*E;u.w+=g.y;if(u.w>2.+4.*w.w)u.y=-1e4;gl_FragColor=u;}')
-  this.We = 0
-  a.bindAttribLocation(this.handle, this.We, 'b')
-  this.attributes.uv = this.We++
+  this.attribCount = 0
+  a.bindAttribLocation(this.handle, this.attribCount, 'b')
+  this.attributes.uv = this.attribCount++
   a.useProgram(this.handle)
   for (var b = a.getProgramParameter(this.handle, 35718), c = 0, e = 0; e < b; ++e) {
     var f = a.getActiveUniform(this.handle, e)
@@ -776,7 +777,7 @@ var iY = function (a) {
           , f = f.type
         35678 == f || 35680 == f ? (f = new Sampler(a, f, k, c++),
           a.uniform1i(k, f.textureX),
-          this.gu[h] = f) : this.Vr[h] = new Uniform(a, f, k)
+          this.samplers[h] = f) : this.uniforms[h] = new Uniform(a, f, k)
       }
     }
   }
