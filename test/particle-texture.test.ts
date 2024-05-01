@@ -3,16 +3,17 @@ import { WebGLContext } from '../src/webgl-context'
 import { setupJestCanvasMock } from 'jest-webgl-canvas-mock'
 
 /* eslint-disabled */
-// @ts-ignore
+// @ts-expect-error
 var createGradientBuffer = function (width, height) {
-  var size = width * height
-  for (var b = new Float32Array(2 * size), c = 0, e = 0; e < height; ++e)
-    for (var f = 0; f < width; ++f) {
-      var h = f / width
-        , k = e / height;
-      b[c++] = h;
+  const size = width * height
+  for (var b = new Float32Array(2 * size), c = 0, e = 0; e < height; ++e) {
+    for (let f = 0; f < width; ++f) {
+      const h = f / width
+      const k = e / height
+      b[c++] = h
       b[c++] = k
     }
+  }
   return b
 }
 /* eslint-enabled */
