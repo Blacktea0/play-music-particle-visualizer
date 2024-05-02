@@ -29,15 +29,15 @@ function main (): void {
     }
   }
 
-  canvas.addEventListener('click', async (e) => {
+  canvas.addEventListener('click', (e) => {
     const audioCtx = new AudioContext()
     const audio = new Audio(url)
     const audioElement = document.body.appendChild(audio)
     const analyserNode = audioCtx.createAnalyser()
     const track = audioCtx.createMediaElementSource(audioElement)
     track.connect(analyserNode)
-    await audioCtx.resume()
-    await audioElement.play()
+    audioCtx.resume().catch(reason => { throw reason })
+    audioElement.play().catch(reason => { throw reason })
 
     const webGLContext = new WebGLContext(canvas, gl)
     const particles = new Particles(analyserNode, gl, canvas, webGLContext)
