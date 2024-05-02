@@ -2,6 +2,7 @@ import url from '../assets/flow.mp3'
 import { Sampler, Uniform, WebGLContext } from './webgl-context'
 import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
 import {createVec3, vec3Add, vec3Sub, vec3Mul, normalizeVector, crossProduct, setMatrix4Column} from './utils'
+import {AudioInfo} from './audio-info'
 
 var d
 
@@ -572,44 +573,12 @@ d.setUniform = function (a, b) {
 }
 
 var sY = [new Float64Array(4), new Float64Array(4), new Float64Array(4)]
-var tY = function (a) {
-  this.raw = new Float32Array(a)
-  this.bL = new Float32Array(a)
-  this.S$ = new Float32Array(a)
-}
-tY.prototype.syb = function (a, b, c) {
-  for (var e = Math.min(a.length, b.length), f = 0; f < e; ++f) {
-    for (var h = 0, k = 0, m = -c; m <= c; ++m) {
-      var p = f + m
-      if (!(0 > p || p >= a.length))
-        var r = m / c
-          , r = Math.exp(-4 * r * r)
-          , h = h + r
-          , k = k + r * a[p]
-    }
-    b[f] = k / h
-  }
-}
-
-tY.prototype.UAb = function (a) {
-  for (var b = 0; b < this.S$.length; ++b)
-    this.S$[b] = this.raw[b]
-  a.getFloatFrequencyData(this.raw)
-  for (b = 0; b < this.raw.length; ++b) {
-    a = this.S$[b]
-    var c = Math.max(0, 20 * Math.pow(10, .05 * this.raw[b]))
-    this.raw[b] = c + (c > a ? .1 : .8) * (a - c)
-  }
-  this.syb(this.raw, this.bL, 8)
-  for (b = 0; b < this.bL.length; ++b)
-    this.bL[b] = Math.max(0, 2 * this.raw[b] - this.bL[b])
-}
 
 var wY = function (a, b, c, e) {
   this.$h = a
   this.fq = c
   this.Ha = e
-  this.zKa = new tY(256)
+  this.zKa = new AudioInfo(256)
   a = 100 * Math.random()
   b = 1
   if (320 < this.fq.width || 320 < this.fq.height)
@@ -749,7 +718,7 @@ d.update = function (a) {
     b = Math.min(.2, b))
   this.UY = a
   a = this.sBb(b)
-  this.zKa.UAb(this.$h)
+  this.zKa.updateAudioData(this.$h)
   this.jB += a
   this.lBb(a)
   this.HAb()
@@ -777,7 +746,7 @@ d.sBb = function (a) {
 
 d.lBb = function (a) {
   for (var b = 0; b < this.Si.length; ++b)
-    this.Si[b].update(a, this.zKa.bL)
+    this.Si[b].update(a, this.zKa.smoothedData)
   this.Ha.colorMask(!0, !0, !0, !0)
   this.Ha.depthMask(!1)
   this.Ha.disable(2929)
