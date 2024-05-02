@@ -1353,7 +1353,7 @@ Particles.prototype.renderForeground = function (a) {
     c.framebuffer0 = k;
     k = Math.floor(this.particleScaleFactor * c.framebuffer0.height) / c.framebuffer0.height;
     this.glContext.bindFramebuffer(c.framebuffer0);
-    this.glContext.bindTexture("randomTex", c.particleTexture);
+    this.glContext.bindTexture("randomTex", c.texture);
     this.glContext.bindTexture("positionTex", c.framebuffer1.colorTexture);
     this.glContext.bindAttributeBuffer("uv", this.vertexBuffer);
     this.glContext.setUniform("emitterSize", .01 + f, h, a * e * 30);

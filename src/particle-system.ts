@@ -10,19 +10,19 @@ export class ParticleSystem {
   position: Float32Array = new Float32Array(3)
   readonly velocity: Float32Array = new Float32Array(3)
   private readonly textureData: [Float32Array, Float32Array]
-  private readonly particleSize: number
-  readonly particleTexture: Texture
+  private readonly size: number
+  readonly texture: Texture
   framebuffer0: Framebuffer
   framebuffer1: Framebuffer
-  readonly positionBuffer: Buffer
+  readonly buffer: Buffer
 
-  constructor (gl: WebGLContext, texture: ParticleTexture, startIndex: number, endIndex: number, maxLifetime: number) {
+  constructor (gl: WebGLContext, particleTex: ParticleTexture, startIndex: number, endIndex: number, maxLifetime: number) {
     this.startIndex = startIndex
     this.maxLifetime = maxLifetime
     const dataLen = endIndex - startIndex
     this.textureData = [new Float32Array(dataLen), new Float32Array(dataLen)]
-    this.particleSize = texture.size
-    this.particleTexture = texture.texture
+    this.size = particleTex.size
+    this.texture = particleTex.texture
 
     const textureOptions: TextureOptions = {
       type: WebGLRenderingContext.FLOAT,
@@ -32,9 +32,9 @@ export class ParticleSystem {
       data: null
     }
 
-    this.framebuffer0 = gl.createFramebuffer(texture.width, texture.height, textureOptions, false)
-    this.framebuffer1 = gl.createFramebuffer(texture.width, texture.height, textureOptions, false)
-    this.positionBuffer = texture.buffer
+    this.framebuffer0 = gl.createFramebuffer(particleTex.width, particleTex.height, textureOptions, false)
+    this.framebuffer1 = gl.createFramebuffer(particleTex.width, particleTex.height, textureOptions, false)
+    this.buffer = particleTex.buffer
 
     this.updatePosition(0)
   }

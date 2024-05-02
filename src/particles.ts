@@ -301,7 +301,7 @@ export class Particles {
       const quality = Math.floor(this.particleScaleFactor * particleSystem.framebuffer0.height) / particleSystem.framebuffer0.height
 
       this.glContext.bindFramebuffer(particleSystem.framebuffer0)
-      this.glContext.bindTexture('randomTex', particleSystem.particleTexture)
+      this.glContext.bindTexture('randomTex', particleSystem.texture)
       this.glContext.bindTexture('positionTex', particleSystem.framebuffer1.colorTexture)
       this.glContext.bindAttributeBuffer('uv', this.vertexBuffer)
       this.glContext.setUniform('emitterSize', 0.01 + emitterSize, particleSize, deltaTime * opacity * 30)
@@ -448,7 +448,7 @@ export class Particles {
     for (let i = 0; i < 2; ++i) {
       const particleSystem = this.particleSystems[i]
       this.glContext.bindTexture('positionTex', particleSystem.framebuffer0.colorTexture)
-      this.glContext.bindAttributeBuffer('uv', particleSystem.positionBuffer)
+      this.glContext.bindAttributeBuffer('uv', particleSystem.buffer)
 
       const numParticles = Math.floor(this.particleScaleFactor * particleSystem.framebuffer0.height) * particleSystem.framebuffer0.width
       const halfParticles = Math.floor(numParticles / 2)

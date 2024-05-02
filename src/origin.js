@@ -4,6 +4,7 @@ import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
 import {createVec3, vec3Add, vec3Sub, vec3Mul, normalizeVector, crossProduct, setMatrix4Column, getTargetPosition} from './utils'
 import {AudioInfo} from './audio-info'
 import {ParticleTexture} from './particle-texture'
+import {ParticleSystem} from './particle-system'
 
 var d
 
@@ -623,7 +624,10 @@ var wY = function (a, b, c, e) {
   this.iBa = !1
   this.sU = this.tU = 0
   b = new ParticleTexture(this.Ha, 512, 1024)
-  this.Si = [new vY(this.Ha, b, 0, 20, a), new vY(this.Ha, b, 20, 200, a + 50 + 50 * Math.random())]
+  this.Si = [
+    new ParticleSystem(this.Ha, b, 0, 20, a),
+    new ParticleSystem(this.Ha, b, 20, 200, a + 50 + 50 * Math.random())
+  ]
   this.Ha.colorMask(!0, !0, !0, !0)
   this.Ha.depthMask(!1)
   this.Ha.disable(2929)
@@ -632,26 +636,13 @@ var wY = function (a, b, c, e) {
   this.Ha.activateProgram(this.Kab)
   this.Ha.bindAttributeBuffer('uv', this.Ji)
   for (c = 0; c < this.Si.length; ++c)
-    this.Ha.bindFramebuffer(this.Si[c].Tt),
+    this.Ha.bindFramebuffer(this.Si[c].framebuffer0),
       this.Ha.drawArrays(4, 0, this.Ji.Qt),
-      this.Ha.bindFramebuffer(this.Si[c].gV),
+      this.Ha.bindFramebuffer(this.Si[c].framebuffer1),
       this.Ha.drawArrays(4, 0, this.Ji.Qt)
   this.Wab()
 }
 u(wY, UX)
-var kka = {
-  wP: wY,
-  displayName: 'Particles',
-  identifier: 'Particles',
-  eNa: {
-    iba: ['OES_texture_float', 'OES_texture_float_linear'],
-    cla: {
-      antialias: !1,
-      depth: !1,
-      stencil: !1
-    }
-  }
-}
 wY.prototype.vVa = function (a) {
   for (var b = new Uint8Array(a * a * a * 4), c = new Float32Array(a * a * a * 4), e = new Float32Array(a * a * a * 4), f = 0; f < b.length; f += 4)
     c[f + 0] = Math.random() - .5,
@@ -753,22 +744,22 @@ d.lBb = function (a) {
   this.Ha.setUniform('randomTexOffset', Math.random(), Math.random())
   for (b = 0; b < this.Si.length; ++b) {
     var c = this.Si[b]
-      , e = c.czb()
+      , e = c.getOpacity()
       , f = 3 * e
       , h = 12 * f * f * f
-      , k = c.gV
-    c.gV = c.Tt
-    c.Tt = k
-    k = Math.floor(this.eA * c.Tt.height) / c.Tt.height
-    this.Ha.bindFramebuffer(c.Tt)
+      , k = c.framebuffer1
+    c.framebuffer1 = c.framebuffer0
+    c.framebuffer0 = k
+    k = Math.floor(this.eA * c.framebuffer0.height) / c.framebuffer0.height
+    this.Ha.bindFramebuffer(c.framebuffer0)
     this.Ha.bindTexture('randomTex', c.texture)
-    this.Ha.bindTexture('positionTex', c.gV.colorTexture)
+    this.Ha.bindTexture('positionTex', c.framebuffer1.colorTexture)
     this.Ha.bindAttributeBuffer('uv', this.Ji)
     this.Ha.setUniform('emitterSize', .01 + f, h, a * e * 30)
     this.Ha.setUniform('pos0', this.Si[b].position)
-    this.Ha.setUniform('vel0', this.Si[b].gha)
+    this.Ha.setUniform('vel0', this.Si[b].velocity)
     this.Ha.setUniform('pos1', this.Si[1 - b].position)
-    this.Ha.setUniform('vel1', this.Si[1 - b].gha)
+    this.Ha.setUniform('vel1', this.Si[1 - b].velocity)
     this.Ha.setUniform('quality', k)
     this.Ha.drawArrays(4, 0, this.Ji.Qt)
   }
@@ -892,9 +883,9 @@ d.Tlb = function () {
   this.Ha.setUniform('density', c)
   for (c = 0; 2 > c; ++c)
     a = this.Si[c],
-      this.Ha.bindTexture('positionTex', a.Tt.colorTexture),
+      this.Ha.bindTexture('positionTex', a.framebuffer0.colorTexture),
       this.Ha.bindAttributeBuffer('uv', a.buffer),
-      a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
+      a = Math.floor(this.eA * a.framebuffer0.height) * a.framebuffer0.width,
       e = Math.floor(a / 2),
       0 == c ? (this.Ha.colorMask(!0, !1, !1, !1),
         this.Ha.drawArrays(0, 0, e),
@@ -958,60 +949,6 @@ d.HAb = function () {
   vec3Mul(c, .05, c)
   vec3Mul(this.Jt, .95, this.Jt)
   vec3Add(this.Jt, c, this.Jt)
-}
-
-var vY = function (a, b, c, e, f) {
-  this.doa = c
-  this.tfa = this.RV = 0
-  this.MX = f
-  this.position = new Float32Array(3)
-  this.gha = new Float32Array(3)
-  this.TE = [new Float32Array(e - c), new Float32Array(e - c)]
-  this.size = b.size
-  this.texture = b.texture
-  c = {
-    type: 5126,
-    filter: 9728
-  }
-  this.Tt = a.createFramebuffer(b.width, b.height, c, !1)
-  this.gV = a.createFramebuffer(b.width, b.height, c, !1)
-  this.buffer = b.buffer
-  this.sMa(0)
-}
-vY.prototype.update = function (a, b) {
-  this.xBb(b)
-  this.sMa(a)
-}
-
-vY.prototype.sMa = function (a) {
-  var b = this.position
-    , c = getTargetPosition(this.MX + .01, 1.5, 3)
-    , e = b[0] - c[0]
-    , f = b[1] - c[1]
-    , b = b[2] - c[2]
-    , e = .01 / (.001 + Math.sqrt(e * e + f * f + b * b))
-    , e = .3 * Math.log(1 + 5 * e)
-  this.MX += this.tfa * a * e
-  a = getTargetPosition(this.MX, 1.5, 3)
-  vec3Sub(a, this.position, this.gha)
-  this.position = a
-}
-
-vY.prototype.xBb = function (a) {
-  for (var b = this.TE[0].length, c = 0, e = 0; e < b; ++e)
-    var f = a[e + this.doa] - Math.min(this.TE[0][e], this.TE[1][e])
-      , f = 4 * f
-      , c = Math.max(c, f);
-  c = Math.min(1, c)
-  this.RV = Math.max(.95 * this.RV, c)
-  this.tfa = Math.max(.9 * this.tfa, 3 * this.RV)
-  for (e = 0; e < b; ++e)
-    this.TE[1][e] = this.TE[0][e],
-      this.TE[0][e] = a[e + this.doa]
-}
-
-vY.prototype.czb = function () {
-  return .05 * this.RV
 }
 
 // entrance
