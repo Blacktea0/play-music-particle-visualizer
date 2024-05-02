@@ -1,6 +1,7 @@
 import url from '../assets/flow.mp3'
 import { Sampler, Uniform, WebGLContext } from './webgl-context'
 import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
+import {createVec3, vec3Add, vec3Sub, vec3Mul, normalizeVector, crossProduct, setMatrix4Column} from './utils'
 
 var d
 
@@ -570,61 +571,7 @@ d.setUniform = function (a, b) {
   c.isMatrix ? c.setter.call(e, c.location, !1, f) : c.setter.call(e, c.location, f)
 }
 
-var lY = function (a, b, c) {
-  var e = new Float32Array(3)
-  e[0] = a
-  e[1] = b
-  e[2] = c
-  return e
-}
-  , mY = function (a, b, c) {
-  c[0] = a[0] + b[0]
-  c[1] = a[1] + b[1]
-  c[2] = a[2] + b[2]
-  return c
-}
-  , nY = function (a, b, c) {
-  c[0] = a[0] - b[0]
-  c[1] = a[1] - b[1]
-  c[2] = a[2] - b[2]
-  return c
-}
-  , oY = function (a, b, c) {
-  c[0] = a[0] * b
-  c[1] = a[1] * b
-  c[2] = a[2] * b
-  return c
-}
-  , pY = function (a, b) {
-  var c = a[0]
-    , e = a[1]
-    , f = a[2]
-    , c = 1 / Math.sqrt(c * c + e * e + f * f)
-  b[0] = a[0] * c
-  b[1] = a[1] * c
-  b[2] = a[2] * c
-  return b
-}
-  , qY = function (a, b, c) {
-  var e = a[0]
-    , f = a[1]
-  a = a[2]
-  var h = b[0]
-    , k = b[1]
-  b = b[2]
-  c[0] = f * b - a * k
-  c[1] = a * h - e * b
-  c[2] = e * k - f * h
-  return c
-}
-var rY = function (a, b, c) {
-  a[b] = c[0]
-  a[b + 4] = c[1]
-  a[b + 8] = c[2]
-  a[b + 12] = c[3]
-  return a
-}
-  , sY = [new Float64Array(4), new Float64Array(4), new Float64Array(4)]
+var sY = [new Float64Array(4), new Float64Array(4), new Float64Array(4)]
 var tY = function (a) {
   this.raw = new Float32Array(a)
   this.bL = new Float32Array(a)
@@ -699,7 +646,7 @@ var wY = function (a, b, c, e) {
   this.jB = 60 * Math.random()
   this.UY = null
   this.Jt = new Float32Array(3)
-  this.pna = lY(0, 0, 0)
+  this.pna = createVec3(0, 0, 0)
   this.dI = new Float32Array(80)
   this.xQ = 0
   this.eA = .5
@@ -784,12 +731,12 @@ var xY = function (a, b, c) {
     , f = 3 * Math.cos(a + Math.sin(.47 * a)) - 2 * Math.sin(.79 * a)
   a = .5 + .5 * (Math.sin(a + Math.cos(.31 * a)) * Math.cos(3.7 * a) - Math.sin(2.1 * a))
   a = b + a * (c - b)
-  return lY(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
+  return createVec3(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
 }
 d = wY.prototype
 d.Nma = function (a, b) {
   a %= 6
-  a = lY(Math.max(0, Math.min(1, Math.abs(a - 3) - 1)), Math.max(0, Math.min(1, 2 - Math.abs(a - 2))), Math.max(0, Math.min(1, 2 - Math.abs(a - 4))))
+  a = createVec3(Math.max(0, Math.min(1, Math.abs(a - 3) - 1)), Math.max(0, Math.min(1, 2 - Math.abs(a - 2))), Math.max(0, Math.min(1, 2 - Math.abs(a - 4))))
   a[0] = 1 - b + b * a[0]
   a[1] = 1 - b + b * a[1]
   a[2] = 1 - b + b * a[2]
@@ -890,23 +837,23 @@ d.Tlb = function () {
     b[15] = 0)
   h = this.pna
   e = sY[0]
-  nY(this.Jt, h, e)
-  pY(e, e)
+  vec3Sub(this.Jt, h, e)
+  normalizeVector(e, e)
   e[3] = 0
   f = sY[1]
-  qY(e, [0, 1, 0], f)
-  pY(f, f)
+  crossProduct(e, [0, 1, 0], f)
+  normalizeVector(f, f)
   f[3] = 0
   var k = sY[2]
-  qY(f, e, k)
-  pY(k, k)
+  crossProduct(f, e, k)
+  normalizeVector(k, k)
   k[3] = 0
   e[0] = -e[0]
   e[1] = -e[1]
   e[2] = -e[2]
-  rY(a, 0, f)
-  rY(a, 1, k)
-  rY(a, 2, e)
+  setMatrix4Column(a, 0, f)
+  setMatrix4Column(a, 1, k)
+  setMatrix4Column(a, 2, e)
   a[3] = 0
   a[7] = 0
   a[11] = 0
@@ -1033,21 +980,21 @@ d.tc = function () {
 
 d.Wab = function () {
   this.Jt = new Float32Array(3)
-  mY(this.Si[0].position, this.Si[1].position, this.Jt)
-  oY(this.Jt, .5, this.Jt)
+  vec3Add(this.Si[0].position, this.Si[1].position, this.Jt)
+  vec3Mul(this.Jt, .5, this.Jt)
 }
 
 d.HAb = function () {
   var a = this.Si[0].position
     , b = this.Si[1].position
     , c = .3 * this.jB
-  this.pna = lY(4.4 * Math.cos(c), 0, 4.4 * Math.sin(c))
+  this.pna = createVec3(4.4 * Math.cos(c), 0, 4.4 * Math.sin(c))
   c = new Float32Array(3)
-  mY(a, b, c)
-  oY(c, .5, c)
-  oY(c, .05, c)
-  oY(this.Jt, .95, this.Jt)
-  mY(this.Jt, c, this.Jt)
+  vec3Add(a, b, c)
+  vec3Mul(c, .5, c)
+  vec3Mul(c, .05, c)
+  vec3Mul(this.Jt, .95, this.Jt)
+  vec3Add(this.Jt, c, this.Jt)
 }
 
 var uY = function (a, b, c) {
@@ -1132,7 +1079,7 @@ vY.prototype.sMa = function (a) {
     , e = .3 * Math.log(1 + 5 * e)
   this.MX += this.tfa * a * e
   a = xY(this.MX, 1.5, 3)
-  nY(a, this.position, this.gha)
+  vec3Sub(a, this.position, this.gha)
   this.position = a
 }
 
