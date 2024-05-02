@@ -1,8 +1,9 @@
 import url from '../assets/flow.mp3'
 import { Sampler, Uniform, WebGLContext } from './webgl-context'
 import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
-import {createVec3, vec3Add, vec3Sub, vec3Mul, normalizeVector, crossProduct, setMatrix4Column} from './utils'
+import {createVec3, vec3Add, vec3Sub, vec3Mul, normalizeVector, crossProduct, setMatrix4Column, getTargetPosition} from './utils'
 import {AudioInfo} from './audio-info'
+import {ParticleTexture} from './particle-texture'
 
 var d
 
@@ -433,7 +434,7 @@ d.createFramebuffer = function (a, b, c, e) {
   var f = null
   e && (f = {
     type: 5123,
-    Gn: 33071,
+    wrap: 33071,
     filter: 9728,
     format: 6402,
     data: null
@@ -488,7 +489,7 @@ var aka = function (a, b, c, e) {
   this.height = c
   this.handle = a.createTexture()
   this.type = void 0 != e.type ? e.type : 5121
-  this.Gn = void 0 != e.Gn ? e.Gn : 10497
+  this.wrap = void 0 != e.wrap ? e.wrap : 10497
   this.filter = void 0 != e.filter ? e.filter : 9729
   this.format = void 0 != e.format ? e.format : 6408
   b = void 0 != e.data ? e.data : null
@@ -496,8 +497,8 @@ var aka = function (a, b, c, e) {
   a.texImage2D(3553, 0, this.format, this.width, this.height, 0, this.format, this.type, b)
   a.texParameteri(3553, 10240, this.filter)
   a.texParameteri(3553, 10241, this.filter)
-  a.texParameteri(3553, 10242, this.Gn)
-  a.texParameteri(3553, 10243, this.Gn)
+  a.texParameteri(3553, 10242, this.wrap)
+  a.texParameteri(3553, 10243, this.wrap)
 }
 
 d = MX.prototype
@@ -602,11 +603,11 @@ var wY = function (a, b, c, e) {
     data: b,
     type: 5121,
     format: 6406,
-    Gn: 10497
+    wrap: 10497
   })
   b = {
     filter: 9729,
-    Gn: 33071
+    wrap: 33071
   }
   this.ZT = this.Ha.createFramebuffer(this.KL, this.JL, b, !1)
   this.Lja = this.Ha.createFramebuffer(this.KL, this.JL, b, !1)
@@ -621,7 +622,7 @@ var wY = function (a, b, c, e) {
   this.eA = .5
   this.iBa = !1
   this.sU = this.tU = 0
-  b = new uY(this.Ha, 512, 1024)
+  b = new ParticleTexture(this.Ha, 512, 1024)
   this.Si = [new vY(this.Ha, b, 0, 20, a), new vY(this.Ha, b, 20, 200, a + 50 + 50 * Math.random())]
   this.Ha.colorMask(!0, !0, !0, !0)
   this.Ha.depthMask(!1)
@@ -695,13 +696,6 @@ wY.prototype.vVa = function (a) {
   })
 }
 
-var xY = function (a, b, c) {
-  var e = 2 * (Math.cos(.51 * a) + Math.sin(.29 * a))
-    , f = 3 * Math.cos(a + Math.sin(.47 * a)) - 2 * Math.sin(.79 * a)
-  a = .5 + .5 * (Math.sin(a + Math.cos(.31 * a)) * Math.cos(3.7 * a) - Math.sin(2.1 * a))
-  a = b + a * (c - b)
-  return createVec3(a * Math.cos(f) * Math.cos(e), a * Math.sin(e), a * Math.sin(f) * Math.cos(e))
-}
 d = wY.prototype
 d.Nma = function (a, b) {
   a %= 6
@@ -767,7 +761,7 @@ d.lBb = function (a) {
     c.Tt = k
     k = Math.floor(this.eA * c.Tt.height) / c.Tt.height
     this.Ha.bindFramebuffer(c.Tt)
-    this.Ha.bindTexture('randomTex', c.maa)
+    this.Ha.bindTexture('randomTex', c.texture)
     this.Ha.bindTexture('positionTex', c.gV.colorTexture)
     this.Ha.bindAttributeBuffer('uv', this.Ji)
     this.Ha.setUniform('emitterSize', .01 + f, h, a * e * 30)
@@ -899,7 +893,7 @@ d.Tlb = function () {
   for (c = 0; 2 > c; ++c)
     a = this.Si[c],
       this.Ha.bindTexture('positionTex', a.Tt.colorTexture),
-      this.Ha.bindAttributeBuffer('uv', a.hha),
+      this.Ha.bindAttributeBuffer('uv', a.buffer),
       a = Math.floor(this.eA * a.Tt.height) * a.Tt.width,
       e = Math.floor(a / 2),
       0 == c ? (this.Ha.colorMask(!0, !1, !1, !1),
@@ -966,55 +960,6 @@ d.HAb = function () {
   vec3Add(this.Jt, c, this.Jt)
 }
 
-var uY = function (a, b, c) {
-  this.mN = b
-  this.kN = c
-  this.y9 = b * c
-  this.maa = this.jVa(a)
-  this.hha = this.tVa(a)
-}
-uY.prototype.jVa = function (a) {
-  for (var b = this.mN, c = this.kN, e = new Float32Array(b * c * 4), f = Math.floor(e.length / 8), h = 0; h < f;) {
-    var k, m, p
-    do
-      k = 2 * Math.random() - 1,
-        m = 2 * Math.random() - 1,
-        p = 2 * Math.random() - 1
-    while (1 < k * k + m * m + p * p)
-    e[h++] = k
-    e[h++] = m
-    e[h++] = p
-    e[h++] = Math.random()
-  }
-  for (var r = [-1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1], A = 0; f < e.length;)
-    for (k = e[A++],
-      m = e[A++],
-      p = e[A++],
-      A++,
-      h = 0; h < r.length;)
-      e[f++] = k * r[h++],
-        e[f++] = m * r[h++],
-        e[f++] = p * r[h++],
-        e[f++] = Math.random()
-  return a.createTexture(b, c, {
-    filter: 9728,
-    data: e,
-    type: 5126,
-    Gn: 10497
-  })
-}
-
-uY.prototype.tVa = function (a) {
-  for (var b = new Float32Array(2 * this.y9), c = 0, e = 0; e < this.kN; ++e)
-    for (var f = 0; f < this.mN; ++f) {
-      var h = f / this.mN
-        , k = e / this.kN
-      b[c++] = h
-      b[c++] = k
-    }
-  return a.createBuffer(2, 35044, b)
-}
-
 var vY = function (a, b, c, e, f) {
   this.doa = c
   this.tfa = this.RV = 0
@@ -1022,15 +967,15 @@ var vY = function (a, b, c, e, f) {
   this.position = new Float32Array(3)
   this.gha = new Float32Array(3)
   this.TE = [new Float32Array(e - c), new Float32Array(e - c)]
-  this.y9 = b.y9
-  this.maa = b.maa
+  this.size = b.size
+  this.texture = b.texture
   c = {
     type: 5126,
     filter: 9728
   }
-  this.Tt = a.createFramebuffer(b.mN, b.kN, c, !1)
-  this.gV = a.createFramebuffer(b.mN, b.kN, c, !1)
-  this.hha = b.hha
+  this.Tt = a.createFramebuffer(b.width, b.height, c, !1)
+  this.gV = a.createFramebuffer(b.width, b.height, c, !1)
+  this.buffer = b.buffer
   this.sMa(0)
 }
 vY.prototype.update = function (a, b) {
@@ -1040,14 +985,14 @@ vY.prototype.update = function (a, b) {
 
 vY.prototype.sMa = function (a) {
   var b = this.position
-    , c = xY(this.MX + .01, 1.5, 3)
+    , c = getTargetPosition(this.MX + .01, 1.5, 3)
     , e = b[0] - c[0]
     , f = b[1] - c[1]
     , b = b[2] - c[2]
     , e = .01 / (.001 + Math.sqrt(e * e + f * f + b * b))
     , e = .3 * Math.log(1 + 5 * e)
   this.MX += this.tfa * a * e
-  a = xY(this.MX, 1.5, 3)
+  a = getTargetPosition(this.MX, 1.5, 3)
   vec3Sub(a, this.position, this.gha)
   this.position = a
 }

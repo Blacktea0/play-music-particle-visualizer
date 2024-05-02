@@ -54,7 +54,7 @@ export class ParticleTexture {
 
     const textureOptions: TextureOptions = {
       format: null,
-      filter: WebGLRenderingContext.LINEAR,
+      filter: WebGLRenderingContext.NEAREST,
       type: WebGLRenderingContext.FLOAT,
       wrap: WebGLRenderingContext.REPEAT,
       data: vector4List
