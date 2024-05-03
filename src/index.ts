@@ -35,7 +35,7 @@ function main (): void {
   const audioElement = document.body.appendChild(audio)
   const analyserNode = audioCtx.createAnalyser()
   const track = audioCtx.createMediaElementSource(audioElement)
-  const delayNode = audioCtx.createDelay(0.1)
+  const delayNode = audioCtx.createDelay(0.05)
   track.connect(analyserNode).connect(delayNode).connect(audioCtx.destination)
 
   const webGLContext = new WebGLContext(canvas, gl)
