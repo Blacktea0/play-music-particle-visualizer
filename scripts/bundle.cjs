@@ -9,7 +9,8 @@ let plugins = [
     renaming: 'all'
   }),
 ]
-if (process.argv[1] === 'serve') {
+const isDev = process.argv[1] === 'serve'
+if (isDev) {
   plugins += livereloadPlugin({})
 }
 
@@ -19,6 +20,7 @@ configure({
   outdir: './dist',
   absWorkingDir: __dirname + '/..',
   plugins: plugins,
+  minify: !isDev,
   loader: {
     '.mp3': 'file'
   }
