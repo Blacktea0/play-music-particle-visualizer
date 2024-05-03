@@ -8,7 +8,7 @@ import {
 } from './webgl-context'
 import { AudioInfo } from './audio-info'
 import { ParticleSystem } from './particle-system'
-import { Cy, Dy, Ey, Fy, Gy, Hy, Iy } from './shader/shader-programs'
+import { ParticleUpdateShader, ColorBlendShader, RenderParticleSystemShader, FinalRenderShader, AlphaMaskShader, ParticleSimulationShader } from './shader/shader-programs'
 import { createVec3, vec3Mul, vec3Add, vec3Sub, normalizeVector, crossProduct, setMatrix4Column } from './utils'
 import { ParticleTexture } from './particle-texture'
 import { type FloatFrequencyDatasource } from './fadeout-datasource'
@@ -59,13 +59,12 @@ export class Particles {
     this.height = Math.floor(this.canvas.height / scale)
     this.ratio = this.width / this.height
 
-    this.particleUpdateProgram = this.glContext.createProgram(Dy)
-    this.glContext.createProgram(Cy)
-    this.colorBlendProgram = this.glContext.createProgram(Ey)
-    this.renderParticleSystemProgram = this.glContext.createProgram(Fy)
-    this.finalRenderProgram = this.glContext.createProgram(Gy)
-    this.alphaMaskProgram = this.glContext.createProgram(Hy)
-    this.particleSimulationProgram = this.glContext.createProgram(Iy)
+    this.particleUpdateProgram = this.glContext.createProgram(ParticleUpdateShader)
+    this.colorBlendProgram = this.glContext.createProgram(ColorBlendShader)
+    this.renderParticleSystemProgram = this.glContext.createProgram(RenderParticleSystemShader)
+    this.finalRenderProgram = this.glContext.createProgram(FinalRenderShader)
+    this.alphaMaskProgram = this.glContext.createProgram(AlphaMaskShader)
+    this.particleSimulationProgram = this.glContext.createProgram(ParticleSimulationShader)
     this.noiseTexture = this.createNoiseTexture(32)
 
     const random = new Uint8Array(16384)
