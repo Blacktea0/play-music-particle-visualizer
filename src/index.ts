@@ -36,7 +36,9 @@ function main (): void {
   const analyserNode = audioCtx.createAnalyser()
   const track = audioCtx.createMediaElementSource(audioElement)
   const delayNode = audioCtx.createDelay(0.05)
-  track.connect(analyserNode).connect(delayNode).connect(audioCtx.destination)
+  const gainNode = audioCtx.createGain()
+  gainNode.gain.value = 0.5
+  track.connect(analyserNode).connect(delayNode).connect(gainNode).connect(audioCtx.destination)
 
   const webGLContext = new WebGLContext(canvas, gl)
   const particles = new Particles(analyserNode, gl, canvas, webGLContext)
