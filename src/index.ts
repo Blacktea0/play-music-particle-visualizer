@@ -47,7 +47,7 @@ function main (): void {
   }
   requestAnimationFrame(render)
 
-  let playing = false
+  let playing = audioCtx.state === 'running'
   canvas.addEventListener('click', () => {
     if (playing) {
       audioElement.pause()
