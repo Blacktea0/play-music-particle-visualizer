@@ -29,25 +29,33 @@ function main (): void {
     }
   }
 
-  canvas.addEventListener('click', (e) => {
-    const audioCtx = new AudioContext()
-    const audio = new Audio(url)
-    const audioElement = document.body.appendChild(audio)
-    const analyserNode = audioCtx.createAnalyser()
-    const track = audioCtx.createMediaElementSource(audioElement)
-    track.connect(analyserNode)
-    audioCtx.resume().catch(reason => { throw reason })
-    audioElement.play().catch(reason => { throw reason })
+  const audioCtx = new AudioContext()
+  const audio = new Audio(url)
+  audio.loop = true
+  const audioElement = document.body.appendChild(audio)
+  const analyserNode = audioCtx.createAnalyser()
+  const track = audioCtx.createMediaElementSource(audioElement)
+  const delayNode = audioCtx.createDelay(0.1)
+  track.connect(analyserNode).connect(delayNode).connect(audioCtx.destination)
 
-    const webGLContext = new WebGLContext(canvas, gl)
-    const particles = new Particles(analyserNode, gl, canvas, webGLContext)
-    particles.renderBackground()
+  const webGLContext = new WebGLContext(canvas, gl)
+  const particles = new Particles(analyserNode, gl, canvas, webGLContext)
 
-    function render (now: number): void {
-      particles.update(now)
-      requestAnimationFrame(render)
-    }
-
+  function render (now: number): void {
+    particles.update(now)
     requestAnimationFrame(render)
+  }
+  requestAnimationFrame(render)
+
+  let playing = false
+  canvas.addEventListener('click', () => {
+    if (playing) {
+      audioElement.pause()
+      playing = false
+    } else {
+      audioCtx.resume().catch(reason => { throw reason })
+      audioElement.play().catch(reason => { throw reason })
+      playing = true
+    }
   })
 }
