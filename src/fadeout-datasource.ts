@@ -1,3 +1,5 @@
+import { FloatFrequencyDatasource } from './frequency-datasource'
+
 export class FadeoutDatasource implements FloatFrequencyDatasource {
   private readonly createTime: number
 
@@ -33,8 +35,4 @@ export class FadeoutDatasource implements FloatFrequencyDatasource {
       array[i] = value > 0 ? 20 * Math.log(value) / logBase10 : -1000
     }
   }
-}
-
-export interface FloatFrequencyDatasource {
-  getFloatFrequencyData: (array: Float32Array) => void
 }
