@@ -11,7 +11,7 @@ import { ParticleSystem } from './particle-system'
 import { ParticleUpdateShader, ColorBlendShader, RenderParticleSystemShader, FinalRenderShader, AlphaMaskShader, ParticleSimulationShader } from './shader/shader-programs'
 import { createVec3, vec3Mul, vec3Add, vec3Sub, normalizeVector, crossProduct, setMatrix4Column } from './utils'
 import { ParticleTexture } from './particle-texture'
-import { type FloatFrequencyDatasource } from './fadeout-datasource'
+import { type FloatFrequencyDatasource } from './frequency-datasource'
 
 export class Particles {
   private readonly analyserNode: FloatFrequencyDatasource
