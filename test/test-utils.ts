@@ -1,4 +1,4 @@
-import { type FloatFrequencyDatasource } from '../src/fadeout-datasource'
+import { type FloatFrequencyDatasource } from '../src/frequency-datasource'
 
 export class RandomDatasource implements FloatFrequencyDatasource {
   getFloatFrequencyData (data: Float32Array): void {

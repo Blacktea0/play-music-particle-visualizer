@@ -1,4 +1,4 @@
-import { type FloatFrequencyDatasource } from './fadeout-datasource'
+import { type FloatFrequencyDatasource } from './frequency-datasource'
 
 export class AudioInfo {
   rawData: Float32Array
