@@ -1,4 +1,4 @@
-import { FloatFrequencyDatasource } from './frequency-datasource'
+import { type FloatFrequencyDatasource } from './frequency-datasource'
 
 export class FadeoutDatasource implements FloatFrequencyDatasource {
   private readonly createTime: number
