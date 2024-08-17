@@ -11,6 +11,7 @@
   },
   "include": [
     "src/**/*.ts",
+    "assets/**/*.ts",
     "test/**/*.ts",
     "scripts/**/*.js",
     ".eslintrc.js",
