@@ -1,6 +1,6 @@
 import { WebGLContext } from './webgl-context'
 import { Particles } from './particles'
-import url from '../assets/flow.mp3'
+import { WallpaperEngineDatasource } from './wallpaper-engine-datasource'
 
 main()
 
@@ -29,35 +29,22 @@ function main (): void {
     }
   }
 
-  const audioCtx = new AudioContext()
-  const audio = new Audio(url)
-  audio.loop = true
-  const audioElement = document.body.appendChild(audio)
-  const analyserNode = audioCtx.createAnalyser()
-  const track = audioCtx.createMediaElementSource(audioElement)
-  const delayNode = audioCtx.createDelay(0.05)
-  const gainNode = audioCtx.createGain()
-  gainNode.gain.value = 0.5
-  track.connect(analyserNode).connect(delayNode).connect(gainNode).connect(audioCtx.destination)
-
   const webGLContext = new WebGLContext(canvas, gl)
-  const particles = new Particles(analyserNode, gl, canvas, webGLContext)
+  const particles = new Particles(WallpaperEngineDatasource.instance, gl, canvas, webGLContext)
 
   function render (now: number): void {
     particles.update(now)
     requestAnimationFrame(render)
   }
+
   requestAnimationFrame(render)
 
-  let playing = audioCtx.state === 'running'
   canvas.addEventListener('click', () => {
-    if (playing) {
-      audioElement.pause()
-      playing = false
-    } else {
-      audioCtx.resume().catch(reason => { throw reason })
-      audioElement.play().catch(reason => { throw reason })
-      playing = true
-    }
+    void WallpaperEngineDatasource.instance.resume()
+  })
+
+  // @ts-expect-error wallpaper engine global function
+  window.wallpaperRegisterAudioListener((array: Float32Array) => {
+    WallpaperEngineDatasource.instance.cache = array
   })
 }
