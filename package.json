@@ -31,7 +31,7 @@
     "esbd": "^3.3.3",
     "esbuild": "^0.20.2",
     "esbuild-plugin-glsl": "^1.2.2",
-    "eslint": "^8.57.0",
+    "eslint": "^9.26.0",
     "eslint-config-love": "latest",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^15.7.0",
