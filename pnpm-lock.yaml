@@ -627,8 +627,8 @@ packages:
   '@sitdisch/esbuild-plugin-glslx@0.0.9':
     resolution: {integrity: sha512-tlJgTrFh1BoVOAISCqmv9RA/T1vIkN6XBwLMOc0Ez0KNkxYWEdJdm9gjxBJeQhtMerutCpWDItgpgxzZ/aZe7Q==}
 
-  '@tootallnate/once@2.0.0':
-    resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
+  '@tootallnate/once@2.0.1':
+    resolution: {integrity: sha512-HqmEUIGRJ5fSXchkVgR5F7qn48bDBzv0kWj/Kfu5e6uci4UlEeng4331LnBkWffb++Ei3FOVLxo8JJWMFBDMeQ==}
     engines: {node: '>= 10'}
 
   '@types/babel__core@7.20.5':
@@ -4037,7 +4037,7 @@ snapshots:
       glslx: 0.3.0
       prepr: 1.2.4
 
-  '@tootallnate/once@2.0.0': {}
+  '@tootallnate/once@2.0.1': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -5560,7 +5560,7 @@ snapshots:
 
   http-proxy-agent@5.0.0:
     dependencies:
-      '@tootallnate/once': 2.0.0
+      '@tootallnate/once': 2.0.1
       agent-base: 6.0.2
       debug: 4.4.3
     transitivePeerDependencies:
