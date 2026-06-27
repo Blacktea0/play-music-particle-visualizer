@@ -12,6 +12,7 @@ import { ParticleUpdateShader, ColorBlendShader, RenderParticleSystemShader, Fin
 import { createVec3, vec3Mul, vec3Add, vec3Sub, normalizeVector, crossProduct, setMatrix4Column } from './utils'
 import { ParticleTexture } from './particle-texture'
 import { type FloatFrequencyDatasource } from './frequency-datasource'
+import { WallpaperEngineDatasource } from './wallpaper-engine-datasource'
 
 export class Particles {
   private readonly analyserNode: FloatFrequencyDatasource
@@ -476,10 +477,13 @@ export class Particles {
     this.glContext.setUniform('color0', ...color0)
     const color1 = Particles.colorFromHue(0.05 * this.time + 2, 0.85)
     this.glContext.setUniform('color1', ...color1)
+    const isTransparent = WallpaperEngineDatasource.instance.isTransparent
+    this.glContext.setUniform('uTransparent', isTransparent ? 1 : 0)
     this.glContext.drawArrays(WebGLRenderingContext.TRIANGLE_STRIP, 0, this.vertexBuffer.vertexCount)
   }
 
   renderBackground (): void {
+    const isTransparent = WallpaperEngineDatasource.instance.isTransparent
     this.setupMatrices()
     this.glContext.disable(WebGLRenderingContext.BLEND)
     this.glContext.bindFramebuffer(this.particleRenderFramebuffer)
@@ -495,7 +499,7 @@ export class Particles {
     this.glContext.bindTexture('mainTex', this.particleRenderFramebuffer.colorTexture)
     this.glContext.bindAttributeBuffer('uv', this.vertexBuffer)
     this.glContext.setUniform('duv', 0, 1 / this.height)
-    this.glContext.setUniform('alphaScaleOffset', 0.25, 0.75)
+    this.glContext.setUniform('alphaScaleOffset', isTransparent ? 0.92 : 0.25, isTransparent ? 0.08 : 0.75)
     this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount)
     this.glContext.disable(WebGLRenderingContext.BLEND)
     this.glContext.bindFramebuffer(null)
@@ -506,6 +510,7 @@ export class Particles {
     const widthOffset = this.canvas.width / this.grainTex.width
     const heightOffset = this.canvas.height / this.grainTex.height
     this.glContext.setUniform('grainScaleOffset', widthOffset, heightOffset, Math.random(), Math.random())
+    this.glContext.setUniform('uTransparent', isTransparent ? 1 : 0)
     this.glContext.drawArrays(4, 0, this.vertexBuffer.vertexCount)
   }
 

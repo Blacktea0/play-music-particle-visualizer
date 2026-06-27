@@ -1,6 +1,5 @@
 import { type FloatFrequencyDatasource } from './frequency-datasource'
-import url from '../assets/flow.mp3'
-
+import { FadeoutDatasource } from './fadeout-datasource'
 export class WallpaperEngineDatasource implements FloatFrequencyDatasource {
   private static _instance: WallpaperEngineDatasource
 
@@ -15,10 +14,9 @@ export class WallpaperEngineDatasource implements FloatFrequencyDatasource {
   }
 
   cache: Float32Array
+  isTransparent: boolean = true
   private readonly isWallpaperEngine: boolean
   private readonly analyserNode: FloatFrequencyDatasource
-  private readonly audioCtx: AudioContext
-  private readonly audioElement: HTMLAudioElement
 
   private constructor () {
     this.cache = new Float32Array(128)
@@ -28,40 +26,26 @@ export class WallpaperEngineDatasource implements FloatFrequencyDatasource {
     } else {
       console.info('not in Wallpaper Engine, init dummy data.')
       this.isWallpaperEngine = false
-      const audioCtx = new AudioContext()
-      const audio = new Audio(url)
-      audio.loop = true
-      const audioElement = document.body.appendChild(audio)
-      const analyserNode = audioCtx.createAnalyser()
-      const track = audioCtx.createMediaElementSource(audioElement)
-      track.connect(analyserNode)
-      this.analyserNode = analyserNode
-      this.audioCtx = audioCtx
-      this.audioElement = audioElement
-      console.log(analyserNode.frequencyBinCount)
+      this.analyserNode = new FadeoutDatasource()
     }
   }
 
   async resume (): Promise<void> {
-    if (!this.isWallpaperEngine && this.audioCtx.state !== 'running') {
-      console.debug('audio context not running, resume it.')
-      await this.audioCtx.resume()
-      await this.audioElement.play()
-    }
+    // noop
   }
 
   getFloatFrequencyData (array: Float32Array): void {
     if (this.isWallpaperEngine) {
-      // audio array of Wallpaper Engine has fixed size of 128
-      // for emphasizing bass, only use bass part of audio info
-      for (let i = 0; i < 16; i++) {
+      // Wallpaper Engine provides 128 audio channels (0-63 left, 64-127 right).
+      // We map the 64 frequency channels to 256 output slots (each channel spans 4 slots).
+      for (let i = 0; i < 64; i++) {
         const left = this.cache[i]
-        const right = this.cache[127 - i]
+        const right = this.cache[64 + i]
         const mono = (left + right) / 2
-        const logVolume = Math.log(Math.min(mono, 1))
-        // output array has length of 256
-        for (let j = 0; j < 16; j++) {
-          array[i * 16 + j] = logVolume
+        // Convert normalized linear volume [0, 1] to decibels (0 to -100 dB).
+        const logVolume = 20 * Math.log10(Math.max(1e-5, mono))
+        for (let j = 0; j < 4; j++) {
+          array[i * 4 + j] = logVolume
         }
       }
     } else {

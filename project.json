@@ -1,0 +1,29 @@
+{
+  "file": "index.html",
+  "general": {
+    "properties": {
+      "schemecolor": {
+        "order": 0,
+        "text": "ui_browse_properties_scheme_color",
+        "type": "color",
+        "value": "0 0 0"
+      },
+      "bg_color": {
+        "order": 1,
+        "text": "Background Color",
+        "type": "color",
+        "value": "1 1 1"
+      },
+      "bg_image": {
+        "order": 2,
+        "text": "Background Image",
+        "type": "file",
+        "value": ""
+      }
+    },
+    "supportsaudioprocessing": true
+  },
+  "title": "Google Play Music Particle Visualizer",
+  "description": "Google Play Music Particle Visualizer ported to Wallpaper Engine",
+  "type": "web"
+}

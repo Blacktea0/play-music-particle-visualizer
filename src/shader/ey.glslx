@@ -10,6 +10,7 @@ export void vertex()
 precision mediump float;
 uniform sampler2D tex;
 uniform vec3 color0, color1;
+uniform float uTransparent;
 export void fragment()
 {
     vec4 sampledColor, outputColor;
@@ -18,6 +19,12 @@ export void fragment()
     sumRG = 0.5 * (sampledColor.x + sampledColor.y);
     sumBA = 0.5 * (sampledColor.z + sampledColor.w);
     outputColor = vec4(color0 * sumRG + color1 * sumBA, sumRG + sumBA);
-    gl_FragColor = 2.0 * sqrt(outputColor);
-    gl_FragColor.xyz = vec3(1) - gl_FragColor.xyz;
+    vec4 fragColor = 2.0 * sqrt(outputColor);
+    if (uTransparent > 0.5) {
+        gl_FragColor.xyz = 1.2 * sqrt(outputColor.xyz);
+        gl_FragColor.w = fragColor.w;
+    } else {
+        gl_FragColor.xyz = vec3(1.0) - fragColor.xyz;
+        gl_FragColor.w = fragColor.w;
+    }
 }
